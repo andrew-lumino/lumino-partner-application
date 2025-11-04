@@ -1,0 +1,315 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+
+    --primary: 222.2 47.4% 11.2%;
+    --primary-foreground: 210 40% 98%;
+
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 222.2 84% 4.9%;
+
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 210 40% 98%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 212.7 26.8% 83.9%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+
+  /* Backup typography styles */
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply font-bold mt-6 mb-4;
+  }
+
+  h1 {
+    @apply text-4xl;
+  }
+
+  h2 {
+    @apply text-3xl;
+  }
+
+  h3 {
+    @apply text-2xl;
+  }
+
+  h4 {
+    @apply text-xl;
+  }
+
+  h5 {
+    @apply text-lg;
+  }
+
+  p {
+    @apply my-4;
+  }
+
+  ul,
+  ol {
+    @apply my-4 ml-6;
+  }
+
+  ul {
+    @apply list-disc;
+  }
+
+  ol {
+    @apply list-decimal;
+  }
+
+  li {
+    @apply my-2;
+  }
+
+  /* Additional spacing for specific sections */
+  .prose h4 {
+    @apply font-bold;
+  }
+
+  .prose h2 + p,
+  .prose h3 + p,
+  .prose h4 + p {
+    @apply mt-2;
+  }
+
+  .prose > div {
+    @apply my-8;
+  }
+}
+
+/* Custom prose class that doesn't rely on @tailwind/typography plugin */
+.custom-prose {
+  @apply max-w-none text-base leading-relaxed;
+}
+
+.custom-prose h1 {
+  @apply text-4xl font-bold mt-8 mb-4;
+}
+
+.custom-prose h2 {
+  @apply text-3xl font-bold mt-8 mb-4;
+}
+
+.custom-prose h3 {
+  @apply text-2xl font-bold mt-6 mb-3;
+}
+
+.custom-prose h4 {
+  @apply text-xl font-bold mt-6 mb-3;
+}
+
+.custom-prose h5 {
+  @apply text-lg font-bold mt-4 mb-2;
+}
+
+.custom-prose p {
+  @apply my-4;
+}
+
+.custom-prose ul {
+  @apply my-4 ml-6 list-disc;
+}
+
+.custom-prose ol {
+  @apply my-4 ml-6 list-decimal;
+}
+
+.custom-prose li {
+  @apply my-2;
+}
+
+.custom-prose table {
+  @apply w-full my-6 border-collapse;
+}
+
+.custom-prose table th {
+  @apply p-2 text-left bg-gray-100 border;
+}
+
+.custom-prose table td {
+  @apply p-2 border;
+}
+
+/* Added utility layer overrides to ensure Tailwind classes work in production */
+@layer utilities {
+  /* Force max-width utilities to have proper specificity */
+  .max-w-6xl {
+    max-width: 72rem !important;
+  }
+
+  .max-w-5xl {
+    max-width: 64rem !important;
+  }
+
+  .max-w-4xl {
+    max-width: 56rem !important;
+  }
+
+  .max-w-3xl {
+    max-width: 48rem !important;
+  }
+
+  .max-w-2xl {
+    max-width: 42rem !important;
+  }
+
+  .max-w-xl {
+    max-width: 36rem !important;
+  }
+
+  .max-w-lg {
+    max-width: 32rem !important;
+  }
+
+  /* Ensure responsive max-width utilities work */
+  @media (min-width: 640px) {
+    .sm\:max-w-6xl {
+      max-width: 72rem !important;
+    }
+
+    .sm\:max-w-5xl {
+      max-width: 64rem !important;
+    }
+
+    .sm\:max-w-4xl {
+      max-width: 56rem !important;
+    }
+
+    .sm\:max-w-3xl {
+      max-width: 48rem !important;
+    }
+
+    .sm\:max-w-2xl {
+      max-width: 42rem !important;
+    }
+
+    .sm\:max-w-xl {
+      max-width: 36rem !important;
+    }
+
+    .sm\:max-w-lg {
+      max-width: 32rem !important;
+    }
+  }
+
+  @media (min-width: 768px) {
+    .md\:max-w-6xl {
+      max-width: 72rem !important;
+    }
+
+    .md\:max-w-5xl {
+      max-width: 64rem !important;
+    }
+
+    .md\:max-w-4xl {
+      max-width: 56rem !important;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .lg\:max-w-6xl {
+      max-width: 72rem !important;
+    }
+
+    .lg\:max-w-5xl {
+      max-width: 64rem !important;
+    }
+  }
+
+  /* Ensure grid and flex utilities work properly */
+  .grid-cols-1 {
+    grid-template-columns: repeat(1, minmax(0, 1fr)) !important;
+  }
+
+  .grid-cols-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .grid-cols-3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
+
+  @media (min-width: 640px) {
+    .sm\:grid-cols-2 {
+      grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
+
+    .sm\:grid-cols-3 {
+      grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    }
+  }
+
+  @media (min-width: 768px) {
+    .md\:grid-cols-2 {
+      grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
+
+    .md\:grid-cols-3 {
+      grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    }
+  }
+}
