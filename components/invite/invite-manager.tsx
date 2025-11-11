@@ -49,19 +49,10 @@ export default function InviteManager() {
   }, [])
 
   const generateInvite = async () => {
-    if (!agent.trim()) {
-      toast({
-        title: "Error",
-        description: "Agent name is required",
-        variant: "destructive",
-      })
-      return
-    }
-
     setIsLoading(true)
     try {
       const payload = {
-        agent: agent.trim(),
+        agent: agent.trim() || "Unknown Agent",
         email: email.trim() || null,
         custom_schedule_a: scheduleType === "custom" && customScheduleA ? customScheduleA : null,
         custom_message: useCustomMessage && customMessage ? customMessage : null,
@@ -101,32 +92,14 @@ export default function InviteManager() {
   }
 
   const sendInviteEmail = async () => {
-    if (!agent.trim()) {
-      toast({
-        title: "Error",
-        description: "Agent name is required",
-        variant: "destructive",
-      })
-      return
-    }
-
-    if (!email.trim()) {
-      toast({
-        title: "Error",
-        description: "Partner email is required to send invite",
-        variant: "destructive",
-      })
-      return
-    }
-
     setIsSending(true)
     try {
       // First, generate the invite if we don't have one
       let currentInviteId = inviteId
       if (!currentInviteId) {
         const payload = {
-          agent: agent.trim(),
-          email: email.trim(),
+          agent: agent.trim() || "Unknown Agent",
+          email: email.trim() || "no-email@example.com",
           custom_schedule_a: scheduleType === "custom" && customScheduleA ? customScheduleA : null,
           custom_message: useCustomMessage && customMessage ? customMessage : null,
           custom_code_of_conduct: useCustomConduct && customConduct ? customConduct : null,
@@ -183,15 +156,6 @@ export default function InviteManager() {
   }
 
   const sendMultipleInvites = async () => {
-    if (!agent.trim()) {
-      toast({
-        title: "Error",
-        description: "Agent name is required",
-        variant: "destructive",
-      })
-      return
-    }
-
     const emailList = emails
       .split("\n")
       .map((e) => e.trim())
@@ -210,7 +174,7 @@ export default function InviteManager() {
     try {
       const payload = {
         emails: emailList,
-        agent: agent.trim(),
+        agent: agent.trim() || "Unknown Agent",
         custom_schedule_a: scheduleType === "custom" && customScheduleA ? customScheduleA : null,
         custom_message: useCustomMessage && customMessage ? customMessage : null,
         custom_code_of_conduct: useCustomConduct && customConduct ? customConduct : null,
@@ -345,7 +309,7 @@ export default function InviteManager() {
             <div className="grid grid-cols-2 gap-2">
               <Button
                 onClick={generateInvite}
-                disabled={isLoading || isSending || !agent.trim()}
+                disabled={isLoading || isSending}
                 variant="outline"
                 className="w-full bg-transparent"
               >
@@ -362,11 +326,7 @@ export default function InviteManager() {
                 )}
               </Button>
 
-              <Button
-                onClick={sendInviteEmail}
-                disabled={isLoading || isSending || !agent.trim() || !email.trim()}
-                className="w-full"
-              >
+              <Button onClick={sendInviteEmail} disabled={isLoading || isSending} className="w-full">
                 {isSending ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -468,7 +428,7 @@ export default function InviteManager() {
               )}
             </div>
 
-            <Button onClick={sendMultipleInvites} disabled={isSendingMultiple || !agent.trim()} className="w-full">
+            <Button onClick={sendMultipleInvites} disabled={isSendingMultiple} className="w-full">
               {isSendingMultiple ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
