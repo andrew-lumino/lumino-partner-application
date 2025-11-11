@@ -4,12 +4,6 @@ import { auth } from "@clerk/nextjs/server"
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 
-// Security: Validate email format
-const isValidEmail = (email: string): boolean => {
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-  return emailRegex.test(email) && email.length <= 254
-}
-
 // Security: Sanitize string inputs
 const sanitizeString = (input: any): string => {
   if (typeof input !== "string") return ""
@@ -38,14 +32,6 @@ export async function POST(req: Request) {
       )
     }
 
-    // Security: Validate email format
-    if (!isValidEmail(email)) {
-      return NextResponse.json(
-        { success: false, error: "Invalid email", message: "Please provide a valid email address" },
-        { status: 400 },
-      )
-    }
-
     // Security: Validate inviteId format (UUID)
     const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
     if (!uuidRegex.test(inviteId)) {
@@ -58,10 +44,11 @@ export async function POST(req: Request) {
     // Security: Sanitize inputs
     const sanitizedEmail = sanitizeString(email)
     const sanitizedAgent = agent ? sanitizeString(agent) : null
+    const sanitizedInviteId = inviteId || "default-invite"
 
     // Use the production base URL
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://partner.golumino.com"
-    const inviteLink = `${baseUrl}?id=${inviteId}`
+    const inviteLink = `${baseUrl}?id=${sanitizedInviteId}`
 
     // Send the email
     const { data, error } = await resend.emails.send({
