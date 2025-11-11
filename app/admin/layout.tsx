@@ -25,7 +25,7 @@ export default async function AdminLayout({
     "zachry@golumino.com",
     "wesley@golumino.com",
     "giorgio@golumino.com",
-    "stephanie@golumino.com",
+    "clay@golumino.com",
     "priscilla@golumino.com",
   ]
 

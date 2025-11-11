@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
     const body = await req.json()
     console.log("Request body:", body)
 
-    const { agentName, agentEmail, customScheduleA, customMessage } = body
+    const { agentName, agentEmail, customScheduleA, customMessage, custom_code_of_conduct } = body
 
     if (!agentName || !agentEmail) {
       console.log("Missing required fields")
@@ -40,6 +40,7 @@ export async function POST(req: NextRequest) {
         agent_email: agentEmail,
         custom_schedule_a: customScheduleA || null,
         custom_message: customMessage || null,
+        custom_code_of_conduct: custom_code_of_conduct || null,
         created_by: userId,
       })
       .select()

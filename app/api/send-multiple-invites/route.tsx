@@ -6,7 +6,7 @@ const resend = new Resend(process.env.RESEND_API_KEY)
 
 export async function POST(req: Request) {
   try {
-    const { emails, agent, custom_schedule_a, custom_message } = await req.json()
+    const { emails, agent, custom_schedule_a, custom_message, custom_code_of_conduct } = await req.json()
     const supabase = createClient()
 
     // Use the correct base URL for the application
@@ -23,6 +23,7 @@ export async function POST(req: Request) {
           partner_email: email,
           custom_schedule_a: custom_schedule_a || null,
           custom_message: custom_message || null,
+          custom_code_of_conduct: custom_code_of_conduct || null,
           created_at: new Date().toISOString(),
         })
         .select("id")

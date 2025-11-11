@@ -3,10 +3,7 @@
 import { Download } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import ScheduleAVersionBadge from "./schedule-a-version-badge"
-import ScheduleAVersionEditor from "./schedule-a-version-editor"
-import ScheduleAVersionHistory from "./schedule-a-version-history"
-import { useState } from "react"
+import { Badge } from "@/components/ui/badge"
 
 interface ScheduleARow {
   category: string
@@ -26,7 +23,6 @@ interface ScheduleADisplayProps {
     business_name?: string
     created_at?: string
     custom_schedule_a?: ScheduleAData | string | null
-    id?: string
   }
 }
 
@@ -220,24 +216,13 @@ export default function ScheduleADisplay({ application }: ScheduleADisplayProps)
     return customRow[field] !== defaultRow[field]
   }
 
-  const [refreshKey, setRefreshKey] = useState(0)
-
   return (
     <div className="space-y-4">
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <CardTitle>Schedule A - Fee Schedule</CardTitle>
-              <ScheduleAVersionBadge isCustom={isCustom} />
-            </div>
-            <div className="flex gap-2">
-              <ScheduleAVersionEditor
-                applicationId={application.id || ""}
-                currentScheduleA={displayData}
-                onSave={() => setRefreshKey((prev) => prev + 1)}
-              />
-            </div>
+            <CardTitle>Schedule A - Fee Schedule</CardTitle>
+            {isCustom && <Badge variant="secondary">Custom Schedule</Badge>}
           </div>
         </CardHeader>
         <CardContent>
@@ -306,17 +291,6 @@ export default function ScheduleADisplay({ application }: ScheduleADisplayProps)
           </div>
         </CardContent>
       </Card>
-
-      {application.id && (
-        <ScheduleAVersionHistory
-          key={refreshKey}
-          applicationId={application.id}
-          onRevert={(versionId, scheduleData) => {
-            // Trigger refresh after revert
-            setRefreshKey((prev) => prev + 1)
-          }}
-        />
-      )}
     </div>
   )
 }
