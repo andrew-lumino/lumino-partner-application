@@ -22,13 +22,8 @@ export async function POST(req: NextRequest) {
 
     const { agentName, agentEmail, customScheduleA, customMessage, custom_code_of_conduct } = body
 
-    if (!agentName || !agentEmail) {
-      console.log("Missing required fields")
-      return NextResponse.json(
-        { success: false, error: "Missing required fields", message: "Agent name and email are required" },
-        { status: 400 },
-      )
-    }
+    const finalAgentName = agentName?.trim() || "Unknown Agent"
+    const finalAgentEmail = agentEmail?.trim() || "no-email@example.com"
 
     const supabase = createClient()
     console.log("Supabase client created")
@@ -36,8 +31,8 @@ export async function POST(req: NextRequest) {
     const { data, error } = await supabase
       .from("partner_invites")
       .insert({
-        agent_name: agentName,
-        agent_email: agentEmail,
+        agent_name: finalAgentName,
+        agent_email: finalAgentEmail,
         custom_schedule_a: customScheduleA || null,
         custom_message: customMessage || null,
         custom_code_of_conduct: custom_code_of_conduct || null,
