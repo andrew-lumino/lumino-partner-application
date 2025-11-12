@@ -63,9 +63,10 @@ interface FormData {
 interface AgreementReviewProps {
   formData: FormData
   scheduleA: ScheduleAData
+  customCodeOfConduct?: any // Added customCodeOfConduct prop
 }
 
-export function AgreementReview({ formData, scheduleA }: AgreementReviewProps) {
+export function AgreementReview({ formData, scheduleA, customCodeOfConduct }: AgreementReviewProps) {
   const orderOfRows: (keyof ScheduleAData)[] = [
     "equipment",
     "associationFees",
@@ -220,37 +221,54 @@ export function AgreementReview({ formData, scheduleA }: AgreementReviewProps) {
       <div>
         <h3 className="text-lg font-bold mb-4 pb-2 border-b">PARTNER'S CODE OF CONDUCT</h3>
         <div className="space-y-4 text-sm">
-          <p>
-            All advertisements and materials involved in or related to the sale of a product or service, or which
-            contain or refer to a name, trade or service mark, products, services, etc., must be approved in writing by
-            Lumino and in advance of their use.
-          </p>
-          <p>
-            The use of the Internet for marketing products and services is subject to the same policies and procedures
-            applicable to written or printed material.
-          </p>
-          <p className="font-bold">EXPERIENCED PARTNERS</p>
-          <p>
-            Lumino recommends that you seek legal advice pertaining to the operation of any ADAD equipment. This
-            document is not intended as a replacement for sound legal advice, and the use of ADAD equipment is entirely
-            your decision and responsibility.
-          </p>
-          <p className="font-bold">AUTOMATED DIALER AND ANNOUNCING DEVICE (ADAD) COMPLIANCE</p>
-          <p>
-            In the following states, ADAD delivered business-to-business sales calls are extremely forbidden: Arkansas
-            (criminal), Maryland (criminal), Mississippi (civil), North Carolina (civil), Washington (civil), and
-            Wyoming (criminal).
-          </p>
-          <p className="font-bold">CONFIDENTIALITY</p>
-          <p>
-            In your role as a Lumino Partner, you will possess confidential information about your Merchant and Lumino.
-            A breach of confidentiality can have serious consequences.
-          </p>
-          <p className="font-bold">VIOLATION OF LUMINO POLICY</p>
-          <p>
-            The purpose of policies and procedures is to ensure Lumino's ability to provide the highest quality products
-            and services to its Merchants and Partners.
-          </p>
+          {customCodeOfConduct?.sections && Array.isArray(customCodeOfConduct.sections) ? (
+            customCodeOfConduct.sections.map((section: any, index: number) => {
+              if (section.type === "header") {
+                return (
+                  <p key={section.id || index} className="font-bold">
+                    {section.content}
+                  </p>
+                )
+              } else if (section.type === "paragraph") {
+                return <p key={section.id || index}>{section.content}</p>
+              }
+              return null
+            })
+          ) : (
+            <>
+              <p>
+                All advertisements and materials involved in or related to the sale of a product or service, or which
+                contain or refer to a name, trade or service mark, products, services, etc., must be approved in writing
+                by Lumino and in advance of their use.
+              </p>
+              <p>
+                The use of the Internet for marketing products and services is subject to the same policies and
+                procedures applicable to written or printed material.
+              </p>
+              <p className="font-bold">EXPERIENCED PARTNERS</p>
+              <p>
+                Lumino recommends that you seek legal advice pertaining to the operation of any ADAD equipment. This
+                document is not intended as a replacement for sound legal advice, and the use of ADAD equipment is
+                entirely your decision and responsibility.
+              </p>
+              <p className="font-bold">AUTOMATED DIALER AND ANNOUNCING DEVICE (ADAD) COMPLIANCE</p>
+              <p>
+                In the following states, ADAD delivered business-to-business sales calls are extremely forbidden:
+                Arkansas (criminal), Maryland (criminal), Mississippi (civil), North Carolina (civil), Washington
+                (civil), and Wyoming (criminal).
+              </p>
+              <p className="font-bold">CONFIDENTIALITY</p>
+              <p>
+                In your role as a Lumino Partner, you will possess confidential information about your Merchant and
+                Lumino. A breach of confidentiality can have serious consequences.
+              </p>
+              <p className="font-bold">VIOLATION OF LUMINO POLICY</p>
+              <p>
+                The purpose of policies and procedures is to ensure Lumino's ability to provide the highest quality
+                products and services to its Merchants and Partners.
+              </p>
+            </>
+          )}
         </div>
       </div>
 

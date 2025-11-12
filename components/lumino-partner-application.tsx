@@ -753,7 +753,8 @@ export default function LuminoPartnerApplication() {
   }
 
   const renderCodeOfConductStep = () => {
-    if (customCodeOfConduct && Array.isArray(customCodeOfConduct)) {
+    const sections = customCodeOfConduct?.sections
+    if (sections && Array.isArray(sections)) {
       return (
         <Card>
           <CardHeader>
@@ -761,7 +762,7 @@ export default function LuminoPartnerApplication() {
             <CardDescription>Please read the following code of conduct carefully.</CardDescription>
           </CardHeader>
           <CardContent className="prose custom-prose dark:prose-invert max-w-none space-y-4">
-            {customCodeOfConduct.map((section: any, index: number) => {
+            {sections.map((section: any, index: number) => {
               if (section.type === "header") {
                 return (
                   <h3 key={section.id || index} className="font-bold">
@@ -1432,7 +1433,11 @@ export default function LuminoPartnerApplication() {
           onScrollCapture={handleAgreementScroll}
           ref={agreementScrollRef}
         >
-          <AgreementReview formData={formData} scheduleA={customScheduleA || defaultScheduleA} />
+          <AgreementReview
+            formData={formData}
+            scheduleA={customScheduleA || defaultScheduleA}
+            customCodeOfConduct={customCodeOfConduct}
+          />
         </ScrollArea>
         {errors.agreement && <p className="text-red-500 text-sm">{errors.agreement}</p>}
 
