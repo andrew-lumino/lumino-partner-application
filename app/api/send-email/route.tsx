@@ -202,15 +202,17 @@ function validateScheduleA(data: any): any {
 
 export async function POST(req: Request) {
   try {
-    console.log("API route called")
+    console.log("[v0] API route called - send-email")
     const body = await req.json()
     const { formData, fileUrls, agreementText, inviteId, customScheduleA } = body
 
-    console.log("Received submission:", {
+    console.log("[v0] Received submission:", {
       formData: formData ? "present" : "missing",
       fileUrls: fileUrls ? "present" : "missing",
-      inviteId,
+      inviteId: inviteId || "NO INVITE ID",
       customScheduleA: customScheduleA ? "present" : "missing",
+      partnerEmail: formData?.partnerEmail,
+      partnerName: formData?.partnerFullName,
     })
 
     if (!formData) {
@@ -239,15 +241,29 @@ export async function POST(req: Request) {
 
     let dbResult
     if (inviteId) {
-      console.log("Updating existing application with ID:", inviteId)
-      dbResult = await supabase.from("partner_applications").update(dbData).eq("id", inviteId).select()
+      console.log("[v0] Attempting to UPDATE existing application with ID:", inviteId)
+      const { data: existingRecord, error: checkError } = await supabase
+        .from("partner_applications")
+        .select("id, status, partner_email")
+        .eq("id", inviteId)
+        .single()
+
+      if (checkError) {
+        console.error("[v0] Record not found for inviteId:", inviteId, checkError)
+        console.log("[v0] Will insert new record instead")
+        dbResult = await supabase.from("partner_applications").insert(dbData).select()
+      } else {
+        console.log("[v0] Found existing record:", existingRecord)
+        dbResult = await supabase.from("partner_applications").update(dbData).eq("id", inviteId).select()
+        console.log("[v0] Update result:", dbResult)
+      }
     } else {
-      console.log("Inserting new application")
+      console.log("[v0] No inviteId provided, inserting new application")
       dbResult = await supabase.from("partner_applications").insert(dbData).select()
     }
 
     if (dbResult.error) {
-      console.error("Supabase DB error:", dbResult.error)
+      console.error("[v0] Supabase DB error:", dbResult.error)
       return NextResponse.json(
         {
           success: false,
@@ -257,7 +273,7 @@ export async function POST(req: Request) {
       )
     }
 
-    console.log("Database operation successful")
+    console.log("[v0] Database operation successful, returned data:", dbResult.data)
 
     // Notify via Zapier
     try {

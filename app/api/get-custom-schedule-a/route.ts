@@ -21,7 +21,7 @@ export async function GET(req: Request) {
 
     const { data, error } = await supabase
       .from("partner_applications")
-      .select("custom_schedule_a, custom_message, custom_code_of_conduct, agent")
+      .select("custom_schedule_a, custom_message, custom_code_of_conduct, custom_terms, agent")
       .eq("id", id)
       .single()
 
@@ -41,6 +41,7 @@ export async function GET(req: Request) {
     let scheduleA = data?.custom_schedule_a
     let message = data?.custom_message
     let codeOfConduct = data?.custom_code_of_conduct
+    let terms = data?.custom_terms
 
     // Handle double-encoded JSON for custom_schedule_a
     if (scheduleA && typeof scheduleA === "string") {
@@ -83,11 +84,25 @@ export async function GET(req: Request) {
       }
     }
 
+    // Handle double-encoded JSON for custom_terms
+    if (terms && typeof terms === "string") {
+      try {
+        terms = JSON.parse(terms)
+        if (typeof terms === "string") {
+          terms = JSON.parse(terms)
+        }
+      } catch (e) {
+        console.error("Error parsing custom_terms:", e)
+        terms = null
+      }
+    }
+
     return NextResponse.json({
       success: true,
       custom_schedule_a: scheduleA,
       custom_message: message,
       custom_code_of_conduct: codeOfConduct,
+      custom_terms: terms,
       agent: data?.agent,
     })
   } catch (error) {

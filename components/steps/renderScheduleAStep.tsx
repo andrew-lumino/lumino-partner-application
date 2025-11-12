@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 
-export const renderScheduleAStep = (customScheduleA?: any) => {
+export const renderScheduleAStep = (customScheduleA?: any, customTerms?: any) => {
   // Helper function to get value from custom data or use default
   const getValue = (key: string, option: string, defaultValue: string) => {
     if (customScheduleA && customScheduleA[key] && customScheduleA[key][option]) {
@@ -45,9 +45,7 @@ export const renderScheduleAStep = (customScheduleA?: any) => {
                   Option 3<br />
                   (High Risk)
                 </th>
-                <th className="px-4 py-2 border align-top">
-                  Option 4
-                </th>
+                <th className="px-4 py-2 border align-top">Option 4</th>
               </tr>
             </thead>
             <tbody className="text-sm">
@@ -160,33 +158,56 @@ export const renderScheduleAStep = (customScheduleA?: any) => {
           <li>Credit Optimization – {getValue("creditOptimization", "option4", "25% Fee")}</li>
         </ul>
       </CardContent>
-      
+
       <CardContent className="prose dark:prose-invert max-w-none">
         <h3 className="text-2xl mt-10 mb-4">TERMS</h3>
-        <p>
-          <strong>PASS-THROUGH FEES</strong> – fees are back-end charges, including but not limited to the cost of
-          postage, paper statements, merchant records, terminal records, TMF look-ups, arbitration, and RMS fees. If any
-          pass-through fees are applicable, they will be priced at cost and passed through to the Sales Partner.
-        </p>
+        {customTerms?.sections && Array.isArray(customTerms.sections) ? (
+          <div className="space-y-4">
+            {customTerms.sections.map((section: any, index: number) => {
+              if (section.type === "header") {
+                return (
+                  <p key={section.id || index} className="font-bold">
+                    {section.content}
+                  </p>
+                )
+              } else if (section.type === "paragraph") {
+                return (
+                  <p key={section.id || index} className="whitespace-pre-wrap">
+                    {section.content}
+                  </p>
+                )
+              }
+              return null
+            })}
+          </div>
+        ) : (
+          <>
+            <p>
+              <strong>PASS-THROUGH FEES</strong> – fees are back-end charges, including but not limited to the cost of
+              postage, paper statements, merchant records, terminal records, TMF look-ups, arbitration, and RMS fees. If
+              any pass-through fees are applicable, they will be priced at cost and passed through to the Sales Partner.
+            </p>
 
-        <p className="mt-6">
-          <strong>SPECIAL TERMS</strong> – This Revenue Sharing Program is part of the Lumino Partner Agreement (
-          <em>"Partner Agreement"</em>). Additional terms and conditions may apply. All approved applications will be
-          paid in accordance with the Option chosen at the time the application is submitted. If there is any change to
-          the service offering that would cause a change to the Option originally chosen, Partner shall be paid at the
-          appropriate Option from the date of the change in service (ex. Sales signed on Option 2 and later want a free
-          POS Option 1). The Partner will be paid according to the new Option from the date the new Option is selected.
-          This result may increase or decrease the residual split.
-        </p>
+            <p className="mt-6">
+              <strong>SPECIAL TERMS</strong> – This Revenue Sharing Program is part of the Lumino Partner Agreement (
+              <em>"Partner Agreement"</em>). Additional terms and conditions may apply. All approved applications will
+              be paid in accordance with the Option chosen at the time the application is submitted. If there is any
+              change to the service offering that would cause a change to the Option originally chosen, Partner shall be
+              paid at the appropriate Option from the date of the change in service (ex. Sales signed on Option 2 and
+              later want a free POS Option 1). The Partner will be paid according to the new Option from the date the
+              new Option is selected. This result may increase or decrease the residual split.
+            </p>
 
-        <p>
-          Only new merchants that are not already on Lumino's platform qualify for the pricing in this{" "}
-          <strong>Schedule A</strong>. Lumino shall retract any commissions paid to Partner for equipment placed at a
-          Merchant location if the Merchant for which commissions were earned cancels, materially reduces processing
-          volume, or the Monthly Minimum is reduced or removed within twelve months from the date of Adjustment as
-          explained above. Partner agrees to use reasonable efforts in assisting Lumino's retrieval of the POS Equipment
-          and Add-Ons in the event of merchant cancellation or termination.
-        </p>
+            <p>
+              Only new merchants that are not already on Lumino's platform qualify for the pricing in this{" "}
+              <strong>Schedule A</strong>. Lumino shall retract any commissions paid to Partner for equipment placed at
+              a Merchant location if the Merchant for which commissions were earned cancels, materially reduces
+              processing volume, or the Monthly Minimum is reduced or removed within twelve months from the date of
+              Adjustment as explained above. Partner agrees to use reasonable efforts in assisting Lumino's retrieval of
+              the POS Equipment and Add-Ons in the event of merchant cancellation or termination.
+            </p>
+          </>
+        )}
       </CardContent>
     </Card>
   )

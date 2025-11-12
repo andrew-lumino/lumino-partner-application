@@ -91,6 +91,7 @@ export default function LuminoPartnerApplication() {
   const [customScheduleA, setCustomScheduleA] = useState<any>(null)
   const [customMessage, setCustomMessage] = useState<any>(null)
   const [customCodeOfConduct, setCustomCodeOfConduct] = useState<any>(null)
+  const [customTerms, setCustomTerms] = useState<any>(null)
   const [isSkipMode, setIsSkipMode] = useState(false)
   const [showQuickActions, setShowQuickActions] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -129,6 +130,9 @@ export default function LuminoPartnerApplication() {
         }
         if (data.custom_code_of_conduct) {
           setCustomCodeOfConduct(data.custom_code_of_conduct)
+        }
+        if (data.custom_terms) {
+          setCustomTerms(data.custom_terms)
         }
       }
     } catch (error) {
@@ -1437,6 +1441,7 @@ export default function LuminoPartnerApplication() {
             formData={formData}
             scheduleA={customScheduleA || defaultScheduleA}
             customCodeOfConduct={customCodeOfConduct}
+            customTerms={customTerms}
           />
         </ScrollArea>
         {errors.agreement && <p className="text-red-500 text-sm">{errors.agreement}</p>}
@@ -1600,7 +1605,7 @@ export default function LuminoPartnerApplication() {
       case 0:
         return renderWelcomeStep(customMessage)
       case 1:
-        return renderScheduleAStep(customScheduleA)
+        return renderScheduleAStep(customScheduleA, customTerms)
       case 2:
         return renderCodeOfConductStep()
       case 3:

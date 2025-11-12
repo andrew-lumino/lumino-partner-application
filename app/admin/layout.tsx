@@ -1,11 +1,6 @@
 import type { ReactNode } from "react"
-import type { Metadata } from "next"
-import { Inter } from "next/font/google"
 import { currentUser } from "@clerk/nextjs/server"
 import { redirect } from "next/navigation"
-import AdminHeader from "@/components/admin/admin-header"
-import { cn } from "@/lib/utils"
-import { ClerkProvider } from "@clerk/nextjs"
 
 export default async function AdminLayout({
   children,
@@ -14,11 +9,8 @@ export default async function AdminLayout({
 }) {
   const user = await currentUser()
 
-  const email = user?.email ??
-    user?.emailAddresses?.[0]?.emailAddress ??
-    user?.primaryEmailAddressId ??
-    user?.email ??
-    ""
+  const email =
+    user?.email ?? user?.emailAddresses?.[0]?.emailAddress ?? user?.primaryEmailAddressId ?? user?.email ?? ""
 
   const authorizedEmails = [
     "andrew@golumino.com",
@@ -27,6 +19,7 @@ export default async function AdminLayout({
     "giorgio@golumino.com",
     "clay@golumino.com",
     "priscilla@golumino.com",
+    "stephanie@golumino.com", // Added stephanie to authorized users
   ]
 
   const isAuthorized = authorizedEmails.includes(email)
@@ -36,5 +29,5 @@ export default async function AdminLayout({
     return null // Just in case
   }
 
-  return (<>{children}</>)
+  return <>{children}</>
 }

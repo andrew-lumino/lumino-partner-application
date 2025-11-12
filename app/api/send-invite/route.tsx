@@ -23,7 +23,7 @@ export async function POST(req: Request) {
     }
 
     const body = await req.json()
-    const { email, agent, custom_schedule_a, custom_message, custom_code_of_conduct } = body
+    const { email, agent, custom_schedule_a, custom_message, custom_code_of_conduct, custom_terms } = body
 
     // Security: Validate required fields
     if (!email) {
@@ -47,6 +47,7 @@ export async function POST(req: Request) {
         custom_schedule_a: custom_schedule_a || null,
         custom_message: custom_message || null,
         custom_code_of_conduct: custom_code_of_conduct || null,
+        custom_terms: custom_terms || null,
         created_at: new Date().toISOString(),
       })
       .select("id")

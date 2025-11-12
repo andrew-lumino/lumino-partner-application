@@ -9,6 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import ScheduleAEditor from "./schedule-a-editor"
 import CustomMessageEditor from "./custom-message-editor"
 import CodeOfConductEditor from "./code-of-conduct-editor"
+import TermsEditor from "./terms-editor"
 import { Copy, Loader2, Mail } from "lucide-react"
 
 export default function InviteManager() {
@@ -30,6 +31,9 @@ export default function InviteManager() {
   const [useCustomConduct, setUseCustomConduct] = useState(false)
   const [customConduct, setCustomConduct] = useState<any>(null)
 
+  const [useCustomTerms, setUseCustomTerms] = useState(false)
+  const [customTerms, setCustomTerms] = useState<any>(null)
+
   const { toast } = useToast()
 
   const handleScheduleATypeChange = useCallback((type: "default" | "custom") => {
@@ -46,6 +50,10 @@ export default function InviteManager() {
 
   const handleConductChange = useCallback((data: any) => {
     setCustomConduct(data)
+  }, [])
+
+  const handleTermsChange = useCallback((data: any) => {
+    setCustomTerms(data)
   }, [])
 
   const sendInviteEmail = async () => {
@@ -66,6 +74,7 @@ export default function InviteManager() {
         custom_schedule_a: scheduleType === "custom" && customScheduleA ? customScheduleA : null,
         custom_message: useCustomMessage && customMessage ? customMessage : null,
         custom_code_of_conduct: useCustomConduct && customConduct ? customConduct : null,
+        custom_terms: useCustomTerms && customTerms ? customTerms : null,
       }
 
       const sendRes = await fetch("/api/send-invite", {
@@ -122,6 +131,7 @@ export default function InviteManager() {
         custom_schedule_a: scheduleType === "custom" && customScheduleA ? customScheduleA : null,
         custom_message: useCustomMessage && customMessage ? customMessage : null,
         custom_code_of_conduct: useCustomConduct && customConduct ? customConduct : null,
+        custom_terms: useCustomTerms && customTerms ? customTerms : null,
       }
 
       const res = await fetch("/api/send-multiple-invites", {
@@ -247,6 +257,23 @@ export default function InviteManager() {
               )}
             </div>
 
+            <div className="space-y-4 pt-4 border-t">
+              <div className="flex items-center justify-between">
+                <label className="text-sm font-medium">Partner Terms</label>
+                <Button
+                  variant={useCustomTerms ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setUseCustomTerms(!useCustomTerms)}
+                  disabled={isLoading || isSending}
+                >
+                  {useCustomTerms ? "Using Custom" : "Use Default"}
+                </Button>
+              </div>
+              {useCustomTerms && (
+                <TermsEditor value={customTerms} onChange={handleTermsChange} disabled={isLoading || isSending} />
+              )}
+            </div>
+
             <Button onClick={sendInviteEmail} disabled={isLoading || isSending} className="w-full">
               {isSending ? (
                 <>
@@ -345,6 +372,23 @@ export default function InviteManager() {
                   onChange={handleConductChange}
                   disabled={isSendingMultiple}
                 />
+              )}
+            </div>
+
+            <div className="space-y-4 pt-4 border-t">
+              <div className="flex items-center justify-between">
+                <label className="text-sm font-medium">Partner Terms</label>
+                <Button
+                  variant={useCustomTerms ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setUseCustomTerms(!useCustomTerms)}
+                  disabled={isSendingMultiple}
+                >
+                  {useCustomTerms ? "Using Custom" : "Use Default"}
+                </Button>
+              </div>
+              {useCustomTerms && (
+                <TermsEditor value={customTerms} onChange={handleTermsChange} disabled={isSendingMultiple} />
               )}
             </div>
 

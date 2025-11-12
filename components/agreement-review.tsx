@@ -64,9 +64,10 @@ interface AgreementReviewProps {
   formData: FormData
   scheduleA: ScheduleAData
   customCodeOfConduct?: any // Added customCodeOfConduct prop
+  customTerms?: any // Added customTerms prop
 }
 
-export function AgreementReview({ formData, scheduleA, customCodeOfConduct }: AgreementReviewProps) {
+export function AgreementReview({ formData, scheduleA, customCodeOfConduct, customTerms }: AgreementReviewProps) {
   const orderOfRows: (keyof ScheduleAData)[] = [
     "equipment",
     "associationFees",
@@ -276,29 +277,54 @@ export function AgreementReview({ formData, scheduleA, customCodeOfConduct }: Ag
       <div>
         <h3 className="text-lg font-bold mb-4 pb-2 border-b">TERMS AND CONDITIONS</h3>
         <div className="space-y-4 text-sm">
-          <p className="font-bold">PARTNER AGREEMENT</p>
-          <p>
-            This Partner Agreement ("Agreement") is entered into as of the date of execution between Lumino
-            Technologies, LLC ("Company") and the Partner identified in the application ("Partner").
-          </p>
-          <p className="font-bold">1. APPOINTMENT AND SCOPE</p>
-          <p>
-            Company appoints Partner as a non-exclusive independent contractor to promote and refer potential clients
-            for Company's payment processing and financial services as detailed in Schedule A.
-          </p>
-          <p className="font-bold">2. COMPENSATION</p>
-          <p>Partner shall receive compensation according to the fee schedule outlined in Schedule A.</p>
-          <p className="font-bold">3. TERM AND TERMINATION</p>
-          <p>
-            This Agreement shall commence on the date of execution and continue until terminated by either party with
-            thirty (30) days written notice.
-          </p>
-          <p className="font-bold">4. INDEPENDENT CONTRACTOR STATUS</p>
-          <p>Partner is an independent contractor and not an employee, agent, or legal representative of Company.</p>
-          <p className="font-bold">5. CONFIDENTIALITY</p>
-          <p>Partner agrees to maintain the confidentiality of all proprietary information.</p>
-          <p className="font-bold">6. GOVERNING LAW</p>
-          <p>This Agreement shall be governed by and construed in accordance with the laws of the State of Delaware.</p>
+          {customTerms?.sections && Array.isArray(customTerms.sections) ? (
+            customTerms.sections.map((section: any, index: number) => {
+              if (section.type === "header") {
+                return (
+                  <p key={section.id || index} className="font-bold">
+                    {section.content}
+                  </p>
+                )
+              } else if (section.type === "paragraph") {
+                return (
+                  <p key={section.id || index} className="whitespace-pre-wrap">
+                    {section.content}
+                  </p>
+                )
+              }
+              return null
+            })
+          ) : (
+            <>
+              <p className="font-bold">PARTNER AGREEMENT</p>
+              <p>
+                This Partner Agreement ("Agreement") is entered into as of the date of execution between Lumino
+                Technologies, LLC ("Company") and the Partner identified in the application ("Partner").
+              </p>
+              <p className="font-bold">1. APPOINTMENT AND SCOPE</p>
+              <p>
+                Company appoints Partner as a non-exclusive independent contractor to promote and refer potential
+                clients for Company's payment processing and financial services as detailed in Schedule A.
+              </p>
+              <p className="font-bold">2. COMPENSATION</p>
+              <p>Partner shall receive compensation according to the fee schedule outlined in Schedule A.</p>
+              <p className="font-bold">3. TERM AND TERMINATION</p>
+              <p>
+                This Agreement shall commence on the date of execution and continue until terminated by either party
+                with thirty (30) days written notice.
+              </p>
+              <p className="font-bold">4. INDEPENDENT CONTRACTOR STATUS</p>
+              <p>
+                Partner is an independent contractor and not an employee, agent, or legal representative of Company.
+              </p>
+              <p className="font-bold">5. CONFIDENTIALITY</p>
+              <p>Partner agrees to maintain the confidentiality of all proprietary information.</p>
+              <p className="font-bold">6. GOVERNING LAW</p>
+              <p>
+                This Agreement shall be governed by and construed in accordance with the laws of the State of Delaware.
+              </p>
+            </>
+          )}
         </div>
       </div>
     </div>
