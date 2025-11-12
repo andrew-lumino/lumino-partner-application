@@ -9,7 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import ScheduleAEditor from "./schedule-a-editor"
 import CustomMessageEditor from "./custom-message-editor"
 import CodeOfConductEditor from "./code-of-conduct-editor"
-import { Copy, Loader2, Mail, LinkIcon } from "lucide-react"
+import { Copy, Loader2, Mail } from "lucide-react"
 
 export default function InviteManager() {
   const [agent, setAgent] = useState("")
@@ -48,94 +48,38 @@ export default function InviteManager() {
     setCustomConduct(data)
   }, [])
 
-  const generateInvite = async () => {
-    setIsLoading(true)
+  const sendInviteEmail = async () => {
+    if (!email || !email.includes("@")) {
+      toast({
+        title: "Error",
+        description: "Please enter a valid email address",
+        variant: "destructive",
+      })
+      return
+    }
+
+    setIsSending(true)
     try {
       const payload = {
+        email: email.trim(),
         agent: agent.trim() || "Unknown Agent",
-        email: email.trim() || null,
         custom_schedule_a: scheduleType === "custom" && customScheduleA ? customScheduleA : null,
         custom_message: useCustomMessage && customMessage ? customMessage : null,
         custom_code_of_conduct: useCustomConduct && customConduct ? customConduct : null,
       }
 
-      const res = await fetch("/api/generate-invite", {
+      const sendRes = await fetch("/api/send-invite", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       })
 
-      const data = await res.json()
-
-      if (data.success) {
-        const baseUrl = typeof window !== "undefined" ? window.location.origin : ""
-        const link = `${baseUrl}?id=${data.inviteId}`
-        setInviteLink(link)
-        setInviteId(data.inviteId)
-        toast({
-          title: "Success!",
-          description: "Invite link generated successfully",
-        })
-      } else {
-        throw new Error(data.error || "Failed to generate invite")
-      }
-    } catch (error) {
-      console.error("Error generating invite:", error)
-      toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "Failed to generate invite",
-        variant: "destructive",
-      })
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
-  const sendInviteEmail = async () => {
-    setIsSending(true)
-    try {
-      // First, generate the invite if we don't have one
-      let currentInviteId = inviteId
-      if (!currentInviteId) {
-        const payload = {
-          agent: agent.trim() || "Unknown Agent",
-          email: email.trim() || "no-email@example.com",
-          custom_schedule_a: scheduleType === "custom" && customScheduleA ? customScheduleA : null,
-          custom_message: useCustomMessage && customMessage ? customMessage : null,
-          custom_code_of_conduct: useCustomConduct && customConduct ? customConduct : null,
-        }
-
-        const genRes = await fetch("/api/generate-invite", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        })
-
-        const genData = await genRes.json()
-        if (!genData.success) {
-          throw new Error(genData.error || "Failed to generate invite")
-        }
-        currentInviteId = genData.inviteId
-        setInviteId(currentInviteId)
-
-        const baseUrl = typeof window !== "undefined" ? window.location.origin : ""
-        const link = `${baseUrl}?id=${currentInviteId}`
-        setInviteLink(link)
-      }
-
-      // Now send the email
-      const sendRes = await fetch("/api/send-invite", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email: email.trim(),
-          inviteId: currentInviteId,
-          agent: agent.trim(),
-        }),
-      })
-
       const sendData = await sendRes.json()
       if (sendData.success) {
+        const link = `https://partner.golumino.com?id=${sendData.inviteId}`
+        setInviteLink(link)
+        setInviteId(sendData.inviteId)
+
         toast({
           title: "Success!",
           description: `Invite email sent to ${email}`,
@@ -242,7 +186,7 @@ export default function InviteManager() {
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium">Partner Email</label>
+              <label className="text-sm font-medium">Partner Email *</label>
               <Input
                 type="email"
                 placeholder="partner@example.com"
@@ -250,9 +194,6 @@ export default function InviteManager() {
                 onChange={(e) => setEmail(e.target.value)}
                 disabled={isLoading || isSending}
               />
-              <p className="text-xs text-muted-foreground">
-                Required for sending email, optional for generating link only
-              </p>
             </div>
 
             <div className="space-y-4 pt-4 border-t">
@@ -306,40 +247,19 @@ export default function InviteManager() {
               )}
             </div>
 
-            <div className="grid grid-cols-2 gap-2">
-              <Button
-                onClick={generateInvite}
-                disabled={isLoading || isSending}
-                variant="outline"
-                className="w-full bg-transparent"
-              >
-                {isLoading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Generating...
-                  </>
-                ) : (
-                  <>
-                    <LinkIcon className="mr-2 h-4 w-4" />
-                    Generate Link
-                  </>
-                )}
-              </Button>
-
-              <Button onClick={sendInviteEmail} disabled={isLoading || isSending} className="w-full">
-                {isSending ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Sending...
-                  </>
-                ) : (
-                  <>
-                    <Mail className="mr-2 h-4 w-4" />
-                    Send Email
-                  </>
-                )}
-              </Button>
-            </div>
+            <Button onClick={sendInviteEmail} disabled={isLoading || isSending} className="w-full">
+              {isSending ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Sending...
+                </>
+              ) : (
+                <>
+                  <Mail className="mr-2 h-4 w-4" />
+                  Send Email Invite
+                </>
+              )}
+            </Button>
 
             {inviteLink && (
               <div className="mt-4 p-4 bg-muted rounded-lg space-y-2">

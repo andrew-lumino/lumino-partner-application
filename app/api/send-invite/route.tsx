@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { Resend } from "resend"
 import { auth } from "@clerk/nextjs/server"
+import { createClient } from "@/lib/supabase/server"
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 
@@ -22,21 +23,12 @@ export async function POST(req: Request) {
     }
 
     const body = await req.json()
-    const { email, inviteId, agent } = body
+    const { email, agent, custom_schedule_a, custom_message, custom_code_of_conduct } = body
 
     // Security: Validate required fields
-    if (!email || !inviteId) {
+    if (!email) {
       return NextResponse.json(
-        { success: false, error: "Missing required fields", message: "Email and inviteId are required" },
-        { status: 400 },
-      )
-    }
-
-    // Security: Validate inviteId format (UUID)
-    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
-    if (!uuidRegex.test(inviteId)) {
-      return NextResponse.json(
-        { success: false, error: "Invalid invite ID", message: "Invite ID format is invalid" },
+        { success: false, error: "Missing required fields", message: "Email is required" },
         { status: 400 },
       )
     }
@@ -44,11 +36,36 @@ export async function POST(req: Request) {
     // Security: Sanitize inputs
     const sanitizedEmail = sanitizeString(email)
     const sanitizedAgent = agent ? sanitizeString(agent) : null
-    const sanitizedInviteId = inviteId || "default-invite"
 
-    // Use the production base URL
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://partner.golumino.com"
-    const inviteLink = `${baseUrl}?id=${sanitizedInviteId}`
+    const supabase = createClient()
+    const { data: inviteData, error: dbError } = await supabase
+      .from("partner_applications")
+      .insert({
+        agent: sanitizedAgent,
+        status: "invited",
+        partner_email: sanitizedEmail,
+        custom_schedule_a: custom_schedule_a || null,
+        custom_message: custom_message || null,
+        custom_code_of_conduct: custom_code_of_conduct || null,
+        created_at: new Date().toISOString(),
+      })
+      .select("id")
+      .single()
+
+    if (dbError) {
+      console.error("Database error:", dbError)
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Failed to create invite record",
+          message: dbError.message || "Database error occurred",
+        },
+        { status: 500 },
+      )
+    }
+
+    const baseUrl = "https://partner.golumino.com"
+    const inviteLink = `${baseUrl}?id=${inviteData.id}`
 
     // Send the email
     const { data, error } = await resend.emails.send({
@@ -74,7 +91,7 @@ export async function POST(req: Request) {
             </a>
           </div>
           
-          <p>This personalized link will connect your application directly with our team, ensuring you receive dedicated support throughout the process.</p>
+          <p>This personalized link will connect your application directly with${sanitizedAgent ? ` ${sanitizedAgent}` : " our team"}, ensuring you receive dedicated support throughout the process.</p>
           
           <p><strong>What makes Lumino different:</strong></p>
           <ul>
@@ -113,6 +130,7 @@ export async function POST(req: Request) {
     return NextResponse.json({
       success: true,
       message: "Invite sent successfully!",
+      inviteId: inviteData.id,
       data,
     })
   } catch (error) {
