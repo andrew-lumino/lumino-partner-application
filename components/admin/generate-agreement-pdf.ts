@@ -141,243 +141,7 @@ const defaultScheduleA: ScheduleAData = {
   },
 }
 
-export async function generateCompleteAgreementPDF(application: any) {
-  const doc = new jsPDF()
-  const pageWidth = doc.internal.pageSize.getWidth()
-  const pageHeight = doc.internal.pageSize.getHeight()
-  const margin = 20
-  let yPos = 20
-
-  // Cover Page
-  doc.setFontSize(24)
-  doc.setFont("helvetica", "bold")
-  doc.text("LUMINO PARTNER AGREEMENT", pageWidth / 2, yPos + 40, { align: "center" })
-
-  yPos += 60
-  doc.setFontSize(14)
-  doc.setFont("helvetica", "normal")
-  if (application.partner_full_name) {
-    doc.text(application.partner_full_name, pageWidth / 2, yPos, { align: "center" })
-    yPos += 10
-  }
-  if (application.business_name) {
-    doc.text(application.business_name, pageWidth / 2, yPos, { align: "center" })
-    yPos += 10
-  }
-  if (application.created_at) {
-    doc.text(`Date: ${new Date(application.created_at).toLocaleDateString()}`, pageWidth / 2, yPos, { align: "center" })
-  }
-
-  // Partner Information Page
-  doc.addPage()
-  yPos = 20
-
-  doc.setFontSize(16)
-  doc.setFont("helvetica", "bold")
-  doc.text("PARTNER INFORMATION", margin, yPos)
-  yPos += 15
-
-  doc.setFontSize(10)
-  doc.setFont("helvetica", "normal")
-
-  const partnerInfo = [
-    { label: "Full Name", value: application.partner_full_name },
-    { label: "Email", value: application.partner_email },
-    { label: "Phone", value: application.partner_phone },
-    { label: "Address", value: application.partner_address },
-    { label: "City", value: application.partner_city },
-    { label: "State", value: application.partner_state },
-    { label: "ZIP Code", value: application.partner_zip },
-  ]
-
-  partnerInfo.forEach((item) => {
-    if (item.value) {
-      doc.setFont("helvetica", "bold")
-      doc.text(`${item.label}:`, margin, yPos)
-      doc.setFont("helvetica", "normal")
-      doc.text(String(item.value), margin + 50, yPos)
-      yPos += 7
-    }
-  })
-
-  yPos += 10
-  doc.setFontSize(16)
-  doc.setFont("helvetica", "bold")
-  doc.text("BUSINESS INFORMATION", margin, yPos)
-  yPos += 15
-
-  doc.setFontSize(10)
-  doc.setFont("helvetica", "normal")
-
-  const businessInfo = [
-    { label: "Business Name", value: application.business_name },
-    { label: "Principal Name", value: application.principal_name },
-    { label: "Federal Tax ID", value: application.federal_tax_id },
-    { label: "Business Type", value: application.business_type },
-    { label: "Website URL", value: application.website_url },
-    { label: "Address", value: application.business_address },
-    { label: "City", value: application.business_city },
-    { label: "State", value: application.business_state },
-    { label: "ZIP Code", value: application.business_zip },
-  ]
-
-  businessInfo.forEach((item) => {
-    if (item.value) {
-      if (yPos > pageHeight - 30) {
-        doc.addPage()
-        yPos = 20
-      }
-      doc.setFont("helvetica", "bold")
-      doc.text(`${item.label}:`, margin, yPos)
-      doc.setFont("helvetica", "normal")
-      doc.text(String(item.value), margin + 50, yPos)
-      yPos += 7
-    }
-  })
-
-  // W-9 Information
-  if (yPos > pageHeight - 80) {
-    doc.addPage()
-    yPos = 20
-  } else {
-    yPos += 10
-  }
-
-  doc.setFontSize(16)
-  doc.setFont("helvetica", "bold")
-  doc.text("W-9 INFORMATION", margin, yPos)
-  yPos += 15
-
-  doc.setFontSize(10)
-  doc.setFont("helvetica", "normal")
-
-  const w9Info = [
-    { label: "Name", value: application.w9_name },
-    { label: "Business Name", value: application.w9_business_name },
-    { label: "Tax Classification", value: application.w9_tax_classification },
-    { label: "Address", value: application.w9_address },
-    { label: "City, State, ZIP", value: application.w9_city_state_zip },
-    { label: "TIN Type", value: application.w9_tin_type?.toUpperCase() },
-    { label: "TIN", value: application.w9_tin ? "***-**-" + application.w9_tin.slice(-4) : undefined },
-  ]
-
-  w9Info.forEach((item) => {
-    if (item.value) {
-      doc.setFont("helvetica", "bold")
-      doc.text(`${item.label}:`, margin, yPos)
-      doc.setFont("helvetica", "normal")
-      doc.text(String(item.value), margin + 50, yPos)
-      yPos += 7
-    }
-  })
-
-  // Schedule A
-  doc.addPage()
-  yPos = 20
-
-  doc.setFontSize(16)
-  doc.setFont("helvetica", "bold")
-  doc.text("SCHEDULE A - FEE SCHEDULE", margin, yPos)
-  yPos += 15
-
-  let scheduleData = application.custom_schedule_a
-
-  if (scheduleData && typeof scheduleData === "string") {
-    try {
-      scheduleData = JSON.parse(scheduleData)
-      if (typeof scheduleData === "string") {
-        scheduleData = JSON.parse(scheduleData)
-      }
-    } catch (e) {
-      console.error("Error parsing schedule A:", e)
-      scheduleData = null
-    }
-  }
-
-  const displaySchedule = scheduleData || defaultScheduleA
-
-  doc.setFontSize(8)
-  doc.setFont("helvetica", "normal")
-
-  // Fixed column widths to prevent overlap
-  const colWidths = [60, 27, 27, 27, 27]
-  const headers = ["Fee Category", "Option 1", "Option 2", "Option 3", "Option 4"]
-
-  doc.setFont("helvetica", "bold")
-  let xPos = margin
-  headers.forEach((header, i) => {
-    doc.text(header, xPos, yPos)
-    xPos += colWidths[i]
-  })
-  yPos += 6
-
-  doc.setFont("helvetica", "normal")
-
-  Object.entries(displaySchedule).forEach(([key, row]: [string, any]) => {
-    if (yPos > pageHeight - 20) {
-      doc.addPage()
-      yPos = 20
-
-      // Reprint headers on new page
-      doc.setFont("helvetica", "bold")
-      xPos = margin
-      headers.forEach((header, i) => {
-        doc.text(header, xPos, yPos)
-        xPos += colWidths[i]
-      })
-      yPos += 6
-      doc.setFont("helvetica", "normal")
-    }
-
-    xPos = margin
-
-    // Category - wrap text to fit column width
-    const categoryLines = doc.splitTextToSize(row.category, colWidths[0] - 2)
-    doc.text(categoryLines, xPos, yPos)
-    const categoryHeight = categoryLines.length * 3.5
-
-    xPos += colWidths[0]
-    // Option 1 - wrap text
-    const opt1Lines = doc.splitTextToSize(row.option1 || "-", colWidths[1] - 2)
-    doc.text(opt1Lines, xPos, yPos)
-    const opt1Height = opt1Lines.length * 3.5
-
-    xPos += colWidths[1]
-    // Option 2 - wrap text
-    const opt2Lines = doc.splitTextToSize(row.option2 || "-", colWidths[2] - 2)
-    doc.text(opt2Lines, xPos, yPos)
-    const opt2Height = opt2Lines.length * 3.5
-
-    xPos += colWidths[2]
-    // Option 3 - wrap text
-    const opt3Lines = doc.splitTextToSize(row.option3 || "-", colWidths[3] - 2)
-    doc.text(opt3Lines, xPos, yPos)
-    const opt3Height = opt3Lines.length * 3.5
-
-    xPos += colWidths[3]
-    // Option 4 - wrap text
-    const opt4Lines = doc.splitTextToSize(row.option4 || "-", colWidths[4] - 2)
-    doc.text(opt4Lines, xPos, yPos)
-    const opt4Height = opt4Lines.length * 3.5
-
-    // Move to next row based on tallest column
-    const maxHeight = Math.max(categoryHeight, opt1Height, opt2Height, opt3Height, opt4Height)
-    yPos += maxHeight + 2.5
-  })
-
-  // Terms and Conditions
-  doc.addPage()
-  yPos = 20
-
-  doc.setFontSize(16)
-  doc.setFont("helvetica", "bold")
-  doc.text("TERMS AND CONDITIONS", margin, yPos)
-  yPos += 15
-
-  doc.setFontSize(8)
-  doc.setFont("helvetica", "normal")
-
-  const termsText = `PARTNER AGREEMENT
+const defaultTermsText = `PARTNER AGREEMENT
 
 This Partner Agreement ("Agreement") is entered into as of the date of execution between Lumino Technologies, LLC ("Company") and the Partner identified in the application ("Partner").
 
@@ -445,42 +209,7 @@ If any provision of this Agreement is held to be invalid or unenforceable, the r
 
 All notices under this Agreement shall be in writing and sent to the email addresses provided in the application or such other addresses as may be designated by either party in writing.`
 
-  const termsLines = termsText.split("\n")
-
-  termsLines.forEach((line) => {
-    if (yPos > pageHeight - 25) {
-      doc.addPage()
-      yPos = 20
-    }
-
-    if (line.trim() === "") {
-      yPos += 3
-    } else {
-      const wrappedLines = doc.splitTextToSize(line, pageWidth - 2 * margin)
-      wrappedLines.forEach((wrappedLine: string) => {
-        if (yPos > pageHeight - 25) {
-          doc.addPage()
-          yPos = 20
-        }
-        doc.text(wrappedLine, margin, yPos)
-        yPos += 4
-      })
-    }
-  })
-
-  // Partner Code of Conduct
-  doc.addPage()
-  yPos = 20
-
-  doc.setFontSize(16)
-  doc.setFont("helvetica", "bold")
-  doc.text("PARTNER'S CODE OF CONDUCT", margin, yPos)
-  yPos += 15
-
-  doc.setFontSize(8)
-  doc.setFont("helvetica", "normal")
-
-  const codeOfConduct = `All advertisements and materials involved in or related to the sale of a product or service, or which contain or refer to a name, trade or service mark, products, services, etc., must be approved in writing by Lumino and in advance of their use. The use of the Internet for marketing products and services is subject to the same policies and procedures applicable to written or printed material.
+const defaultCodeOfConduct = `All advertisements and materials involved in or related to the sale of a product or service, or which contain or refer to a name, trade or service mark, products, services, etc., must be approved in writing by Lumino and in advance of their use. The use of the Internet for marketing products and services is subject to the same policies and procedures applicable to written or printed material.
 
 Please note that to help all of our partners maintain compliance with the Visa/MasterCard regulations regarding the advertisement of card processing services on the Internet, all of the Visa/MasterCard regulations must be met in addition to the following:
 
@@ -546,37 +275,367 @@ The purpose of policies and procedures is to ensure Lumino's ability to provide 
 
 Lumino requires all Partners to abide by its policies and procedures. Due to frequent law changes, these compliances are subject to change. Partners will be responsible for being up-to-date with current regulations.`
 
-  const conductLines = codeOfConduct.split("\n")
+// Helper function to safely extract text from JSONB or text field
+function extractText(field: any, defaultText: string): string {
+  if (!field) return defaultText
+  
+  // If it's already a string, return it
+  if (typeof field === 'string') {
+    // Try to parse if it looks like JSON
+    if (field.trim().startsWith('{') || field.trim().startsWith('[')) {
+      try {
+        const parsed = JSON.parse(field)
+        if (typeof parsed === 'string') return parsed
+        if (parsed.text) return parsed.text
+        if (parsed.content) return parsed.content
+      } catch (e) {
+        // If parse fails, return as-is
+        return field
+      }
+    }
+    return field
+  }
+  
+  // If it's an object, look for common text fields
+  if (typeof field === 'object') {
+    if (field.text) return field.text
+    if (field.content) return field.content
+    if (field.value) return field.value
+  }
+  
+  return defaultText
+}
 
-  conductLines.forEach((line) => {
+// Helper to add text with proper wrapping and pagination
+function addWrappedText(
+  doc: jsPDF,
+  text: string,
+  xPos: number,
+  yPos: number,
+  maxWidth: number,
+  lineHeight: number,
+  pageHeight: number,
+  margin: number
+): number {
+  const lines = doc.splitTextToSize(text, maxWidth)
+  
+  lines.forEach((line: string) => {
+    if (yPos > pageHeight - margin - 10) {
+      doc.addPage()
+      yPos = margin
+    }
+    doc.text(line, xPos, yPos)
+    yPos += lineHeight
+  })
+  
+  return yPos
+}
+
+export async function generateCompleteAgreementPDF(application: any) {
+  const doc = new jsPDF()
+  const pageWidth = doc.internal.pageSize.getWidth()
+  const pageHeight = doc.internal.pageSize.getHeight()
+  const margin = 20
+  let yPos = 20
+
+  // Extract custom fields with fallbacks
+  const customMessage = extractText(application.custom_message, '')
+  const termsText = extractText(application.custom_terms, application.agreement_text || defaultTermsText)
+  const codeOfConduct = extractText(application.custom_code_of_conduct, defaultCodeOfConduct)
+
+  // Cover Page
+  doc.setFontSize(24)
+  doc.setFont("helvetica", "bold")
+  doc.text("LUMINO PARTNER AGREEMENT", pageWidth / 2, yPos + 40, { align: "center" })
+
+  yPos += 60
+  doc.setFontSize(14)
+  doc.setFont("helvetica", "normal")
+  if (application.partner_full_name) {
+    doc.text(application.partner_full_name, pageWidth / 2, yPos, { align: "center" })
+    yPos += 10
+  }
+  if (application.business_name) {
+    doc.text(application.business_name, pageWidth / 2, yPos, { align: "center" })
+    yPos += 10
+  }
+  if (application.created_at) {
+    doc.text(`Date: ${new Date(application.created_at).toLocaleDateString()}`, pageWidth / 2, yPos, { align: "center" })
+  }
+
+  // Custom Message (if exists)
+  if (customMessage) {
+    yPos += 30
+    doc.setFontSize(12)
+    doc.setFont("helvetica", "normal")
+    yPos = addWrappedText(doc, customMessage, margin, yPos, pageWidth - 2 * margin, 7, pageHeight, margin)
+  }
+
+  // Partner Information Page
+  doc.addPage()
+  yPos = margin
+
+  doc.setFontSize(16)
+  doc.setFont("helvetica", "bold")
+  doc.text("PARTNER INFORMATION", margin, yPos)
+  yPos += 15
+
+  doc.setFontSize(10)
+  doc.setFont("helvetica", "normal")
+
+  const partnerInfo = [
+    { label: "Full Name", value: application.partner_full_name },
+    { label: "Email", value: application.partner_email },
+    { label: "Phone", value: application.partner_phone },
+    { label: "Address", value: application.partner_address },
+    { label: "City", value: application.partner_city },
+    { label: "State", value: application.partner_state },
+    { label: "ZIP Code", value: application.partner_zip },
+  ]
+
+  partnerInfo.forEach((item) => {
+    if (item.value) {
+      doc.setFont("helvetica", "bold")
+      doc.text(`${item.label}:`, margin, yPos)
+      doc.setFont("helvetica", "normal")
+      doc.text(String(item.value), margin + 50, yPos)
+      yPos += 7
+    }
+  })
+
+  yPos += 10
+  doc.setFontSize(16)
+  doc.setFont("helvetica", "bold")
+  doc.text("BUSINESS INFORMATION", margin, yPos)
+  yPos += 15
+
+  doc.setFontSize(10)
+  doc.setFont("helvetica", "normal")
+
+  const businessInfo = [
+    { label: "Business Name", value: application.business_name },
+    { label: "Principal Name", value: application.principal_name },
+    { label: "Federal Tax ID", value: application.federal_tax_id },
+    { label: "Business Type", value: application.business_type },
+    { label: "Website URL", value: application.website_url },
+    { label: "Address", value: application.business_address },
+    { label: "City", value: application.business_city },
+    { label: "State", value: application.business_state },
+    { label: "ZIP Code", value: application.business_zip },
+  ]
+
+  businessInfo.forEach((item) => {
+    if (item.value) {
+      if (yPos > pageHeight - 30) {
+        doc.addPage()
+        yPos = margin
+      }
+      doc.setFont("helvetica", "bold")
+      doc.text(`${item.label}:`, margin, yPos)
+      doc.setFont("helvetica", "normal")
+      doc.text(String(item.value), margin + 50, yPos)
+      yPos += 7
+    }
+  })
+
+  // W-9 Information
+  if (yPos > pageHeight - 80) {
+    doc.addPage()
+    yPos = margin
+  } else {
+    yPos += 10
+  }
+
+  doc.setFontSize(16)
+  doc.setFont("helvetica", "bold")
+  doc.text("W-9 INFORMATION", margin, yPos)
+  yPos += 15
+
+  doc.setFontSize(10)
+  doc.setFont("helvetica", "normal")
+
+  const w9Info = [
+    { label: "Name", value: application.w9_name },
+    { label: "Business Name", value: application.w9_business_name },
+    { label: "Tax Classification", value: application.w9_tax_classification },
+    { label: "Address", value: application.w9_address },
+    { label: "City, State, ZIP", value: application.w9_city_state_zip },
+    { label: "TIN Type", value: application.w9_tin_type?.toUpperCase() || application.w9_t_i_n_type?.toUpperCase() },
+    { label: "TIN", value: (application.w9_tin || application.w9_t_i_n) ? "***-**-" + (application.w9_tin || application.w9_t_i_n).slice(-4) : undefined },
+  ]
+
+  w9Info.forEach((item) => {
+    if (item.value) {
+      doc.setFont("helvetica", "bold")
+      doc.text(`${item.label}:`, margin, yPos)
+      doc.setFont("helvetica", "normal")
+      doc.text(String(item.value), margin + 50, yPos)
+      yPos += 7
+    }
+  })
+
+  // Schedule A - WITH PROPER TABLE BORDERS
+  doc.addPage()
+  yPos = margin
+
+  doc.setFontSize(16)
+  doc.setFont("helvetica", "bold")
+  doc.text("SCHEDULE A - FEE SCHEDULE", margin, yPos)
+  yPos += 15
+
+  let scheduleData = application.custom_schedule_a
+
+  if (scheduleData && typeof scheduleData === "string") {
+    try {
+      scheduleData = JSON.parse(scheduleData)
+      if (typeof scheduleData === "string") {
+        scheduleData = JSON.parse(scheduleData)
+      }
+    } catch (e) {
+      console.error("Error parsing schedule A:", e)
+      scheduleData = null
+    }
+  }
+
+  const displaySchedule = scheduleData || defaultScheduleA
+
+  doc.setFontSize(8)
+  doc.setFont("helvetica", "bold")
+
+  // Table setup with borders
+  const tableStartY = yPos
+  const colWidths = [70, 25, 25, 25, 25]
+  const rowHeight = 8
+  const headers = ["Fee Category", "Option 1", "Option 2", "Option 3", "Option 4"]
+
+  // Draw header row with background
+  doc.setFillColor(240, 240, 240)
+  doc.rect(margin, yPos - 5, colWidths.reduce((a, b) => a + b, 0), rowHeight, "F")
+  
+  let xPos = margin
+  headers.forEach((header, i) => {
+    doc.setDrawColor(0, 0, 0)
+    doc.rect(xPos, yPos - 5, colWidths[i], rowHeight, "S")
+    doc.text(header, xPos + 2, yPos)
+    xPos += colWidths[i]
+  })
+  yPos += rowHeight
+
+  doc.setFont("helvetica", "normal")
+
+  // Draw data rows
+  Object.entries(displaySchedule).forEach(([key, row]: [string, any]) => {
+    if (yPos > pageHeight - 20) {
+      doc.addPage()
+      yPos = margin
+
+      // Reprint headers on new page
+      doc.setFont("helvetica", "bold")
+      doc.setFillColor(240, 240, 240)
+      doc.rect(margin, yPos - 5, colWidths.reduce((a, b) => a + b, 0), rowHeight, "F")
+      
+      xPos = margin
+      headers.forEach((header, i) => {
+        doc.rect(xPos, yPos - 5, colWidths[i], rowHeight, "S")
+        doc.text(header, xPos + 2, yPos)
+        xPos += colWidths[i]
+      })
+      yPos += rowHeight
+      doc.setFont("helvetica", "normal")
+    }
+
+    const rowStartY = yPos - 5
+    xPos = margin
+
+    // Draw each cell with border
+    const cellData = [
+      row.category || "-",
+      row.option1 || "-",
+      row.option2 || "-",
+      row.option3 || "-",
+      row.option4 || "-"
+    ]
+
+    let maxCellHeight = rowHeight
+    cellData.forEach((data, i) => {
+      const lines = doc.splitTextToSize(data, colWidths[i] - 4)
+      const cellHeight = Math.max(lines.length * 4, rowHeight)
+      if (cellHeight > maxCellHeight) maxCellHeight = cellHeight
+    })
+
+    // Draw cells
+    cellData.forEach((data, i) => {
+      doc.rect(xPos, rowStartY, colWidths[i], maxCellHeight, "S")
+      const lines = doc.splitTextToSize(data, colWidths[i] - 4)
+      lines.forEach((line: string, lineIdx: number) => {
+        doc.text(line, xPos + 2, yPos + (lineIdx * 4))
+      })
+      xPos += colWidths[i]
+    })
+
+    yPos += maxCellHeight
+  })
+
+  // Terms and Conditions
+  doc.addPage()
+  yPos = margin
+
+  doc.setFontSize(16)
+  doc.setFont("helvetica", "bold")
+  doc.text("TERMS AND CONDITIONS", margin, yPos)
+  yPos += 15
+
+  doc.setFontSize(9)
+  doc.setFont("helvetica", "normal")
+
+  const termsLines = termsText.split("\n")
+  termsLines.forEach((line) => {
     if (yPos > pageHeight - 25) {
       doc.addPage()
-      yPos = 20
+      yPos = margin
     }
 
     if (line.trim() === "") {
-      yPos += 3
+      yPos += 4
     } else {
-      const wrappedLines = doc.splitTextToSize(line, pageWidth - 2 * margin)
-      wrappedLines.forEach((wrappedLine: string) => {
-        if (yPos > pageHeight - 25) {
-          doc.addPage()
-          yPos = 20
-        }
-        doc.text(wrappedLine, margin, yPos)
-        yPos += 4
-      })
+      yPos = addWrappedText(doc, line, margin, yPos, pageWidth - 2 * margin, 4.5, pageHeight, margin)
+    }
+  })
+
+  // Partner's Code of Conduct
+  doc.addPage()
+  yPos = margin
+
+  doc.setFontSize(16)
+  doc.setFont("helvetica", "bold")
+  doc.text("PARTNER'S CODE OF CONDUCT", margin, yPos)
+  yPos += 15
+
+  doc.setFontSize(9)
+  doc.setFont("helvetica", "normal")
+
+  const conductLines = codeOfConduct.split("\n")
+  conductLines.forEach((line) => {
+    if (yPos > pageHeight - 25) {
+      doc.addPage()
+      yPos = margin
+    }
+
+    if (line.trim() === "") {
+      yPos += 4
+    } else {
+      yPos = addWrappedText(doc, line, margin, yPos, pageWidth - 2 * margin, 4.5, pageHeight, margin)
     }
   })
 
   // Signature Section
   doc.addPage()
-  yPos = 20
+  yPos = margin
 
-  doc.setFontSize(14)
+  doc.setFontSize(16)
   doc.setFont("helvetica", "bold")
   doc.text("SIGNATURES", margin, yPos)
-  yPos += 15
+  yPos += 10
 
   doc.setFontSize(10)
   doc.setFont("helvetica", "normal")
@@ -584,15 +643,19 @@ Lumino requires all Partners to abide by its policies and procedures. Due to fre
   yPos += 20
 
   // Lumino Signature
+  doc.setFontSize(12)
   doc.setFont("helvetica", "bold")
   doc.text("LUMINO TECHNOLOGIES, LLC", margin, yPos)
-  yPos += 15 // Changed from 10 to 15 - more space before signature line
+  yPos += 15
 
+  doc.setFontSize(10)
   doc.setFont("helvetica", "normal")
-  doc.text("Signature: _________________________________", margin, yPos)
-  yPos -= 10 // Move UP to place signature ABOVE the line
-
-  // Add signature image
+  
+  // Draw signature line
+  doc.setDrawColor(0, 0, 0)
+  doc.line(margin + 20, yPos + 5, margin + 100, yPos + 5)
+  
+  // Add CEO signature image ABOVE the line
   try {
     const signatureImg = new Image()
     signatureImg.crossOrigin = "anonymous"
@@ -600,42 +663,47 @@ Lumino requires all Partners to abide by its policies and procedures. Due to fre
 
     await new Promise((resolve, reject) => {
       signatureImg.onload = () => {
-        doc.addImage(signatureImg, "PNG", margin + 20, yPos, 60, 18)
+        // Position signature to sit ON the line
+        doc.addImage(signatureImg, "PNG", margin + 25, yPos - 10, 50, 15)
         resolve(true)
       }
       signatureImg.onerror = reject
       setTimeout(reject, 5000)
     })
   } catch (error) {
-    console.error("Could not load signature image:", error)
+    console.error("Could not load CEO signature image:", error)
   }
 
-  yPos += 25 // Move past the signature line to the Name/Title
-  doc.text("Name/Title: Zachry Godfrey, CEO", margin, yPos)
   yPos += 10
+  doc.text("Name/Title: Zachry Godfrey, CEO", margin, yPos)
+  yPos += 7
   doc.text(`Date: ${new Date().toLocaleDateString()}`, margin, yPos)
 
   // Partner Signature Section
-  yPos += 30
+  yPos += 25
 
+  doc.setFontSize(12)
   doc.setFont("helvetica", "bold")
   doc.text("PARTNER", margin, yPos)
-  yPos += 10
+  yPos += 15
 
+  doc.setFontSize(10)
   doc.setFont("helvetica", "normal")
-  doc.text("Signature: _________________________________", margin, yPos)
-  yPos += 5
+  
+  // Draw signature line
+  doc.line(margin + 20, yPos + 5, margin + 100, yPos + 5)
 
-  // Add partner signature if available
-  if (application.signature_data_url) {
+  // Add partner signature if available - USING CORRECT FIELD NAME
+  if (application.code_of_conduct_signature) {
     try {
       const partnerSigImg = new Image()
       partnerSigImg.crossOrigin = "anonymous"
-      partnerSigImg.src = application.signature_data_url
+      partnerSigImg.src = application.code_of_conduct_signature
 
       await new Promise((resolve, reject) => {
         partnerSigImg.onload = () => {
-          doc.addImage(partnerSigImg, "PNG", margin + 20, yPos - 18, 60, 18)
+          // Position signature to sit ON the line
+          doc.addImage(partnerSigImg, "PNG", margin + 25, yPos - 10, 50, 15)
           resolve(true)
         }
         partnerSigImg.onerror = reject
@@ -645,46 +713,41 @@ Lumino requires all Partners to abide by its policies and procedures. Due to fre
       console.error("Could not load partner signature image:", error)
     }
   } else if (application.partner_full_name) {
-    // If no signature image, display their typed name in italics
+    // If no signature image, display typed name
     doc.setFont("helvetica", "italic")
-    doc.text(`/s/ ${application.partner_full_name}`, margin + 20, yPos - 5)
+    doc.text(`/s/ ${application.partner_full_name}`, margin + 25, yPos)
     doc.setFont("helvetica", "normal")
   }
 
-  yPos += 15
-  // Use signature_full_name if available, otherwise fall back to partner_full_name
+  yPos += 10
   const signerName = application.signature_full_name || application.partner_full_name || "[Partner Name]"
   doc.text(`Name: ${signerName}`, margin, yPos)
 
-  yPos += 10
+  yPos += 7
+  const sigDate = application.code_of_conduct_date || application.signature_date
   doc.text(
-    `Date: ${application.signature_date ? new Date(application.signature_date).toLocaleDateString() : "[Date]"}`,
+    `Date: ${sigDate ? new Date(sigDate).toLocaleDateString() : "[Date]"}`,
     margin,
     yPos,
   )
 
   // Electronic Execution Acknowledgment
-  yPos += 30
+  yPos += 20
 
-  // Add checkbox with checkmark
-  doc.setFillColor(0, 0, 0) // Black fill for checkmark
-  doc.setDrawColor(0, 0, 0) // Black border
-  doc.rect(margin, yPos - 3, 4, 4, "S") // Draw checkbox outline
-
-  // Draw checkmark inside the box
-  doc.setFont("helvetica", "bold")
-  doc.setFontSize(10)
-  doc.text("✓", margin + 0.3, yPos + 1.5) // Position checkmark inside box
-
-  yPos += 2
   doc.setFontSize(9)
   doc.setFont("helvetica", "bold")
-  doc.text("Electronic Execution Acknowledgment", margin + 8, yPos)
-  yPos += 8
+  
+  // Checkbox
+  doc.setDrawColor(0, 0, 0)
+  doc.rect(margin, yPos - 2.5, 3.5, 3.5, "S")
+  doc.text("✓", margin + 0.5, yPos + 1.5)
+
+  doc.text("Electronic Execution Acknowledgment", margin + 6, yPos + 1)
+  yPos += 7
 
   doc.setFont("helvetica", "normal")
-  const executionDate = application.signature_date
-    ? new Date(application.signature_date).toLocaleDateString("en-US", {
+  const executionDate = (application.code_of_conduct_date || application.signature_date)
+    ? new Date(application.code_of_conduct_date || application.signature_date).toLocaleDateString("en-US", {
         year: "numeric",
         month: "long",
         day: "numeric",
@@ -693,16 +756,12 @@ Lumino requires all Partners to abide by its policies and procedures. Due to fre
 
   const acknowledgmentText = `This Agreement was accepted and executed electronically as of ${executionDate} by ${signerName}. The parties acknowledge that electronic signatures have the same legal effect as handwritten signatures.`
 
-  const wrappedAcknowledgment = doc.splitTextToSize(acknowledgmentText, pageWidth - 2 * margin - 10)
-  wrappedAcknowledgment.forEach((line: string) => {
-    doc.text(line, margin + 8, yPos)
-    yPos += 5
-  })
+  yPos = addWrappedText(doc, acknowledgmentText, margin + 6, yPos, pageWidth - 2 * margin - 6, 4.5, pageHeight, margin)
 
   // Save PDF
   const timestamp = new Date().toISOString().slice(0, 10)
   const partnerName = application.partner_full_name
     ? application.partner_full_name.replace(/[^a-zA-Z0-9]/g, "-")
     : "Partner"
-  doc.save(`Complete-Agreement-${partnerName}-${timestamp}.pdf`)
+  doc.save(`Lumino-Partner-Agreement-${partnerName}-${timestamp}.pdf`)
 }
