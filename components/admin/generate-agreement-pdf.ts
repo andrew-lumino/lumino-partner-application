@@ -168,71 +168,6 @@ export async function generateCompleteAgreementPDF(application: any) {
     doc.text(`Date: ${new Date(application.created_at).toLocaleDateString()}`, pageWidth / 2, yPos, { align: "center" })
   }
 
-  if (application.custom_message) {
-    doc.addPage()
-    yPos = 20
-
-    doc.setFontSize(16)
-    doc.setFont("helvetica", "bold")
-    doc.text("WELCOME MESSAGE", margin, yPos)
-    yPos += 15
-
-    doc.setFontSize(10)
-    doc.setFont("helvetica", "normal")
-
-    let customMessage = application.custom_message
-
-    // Parse if it's a string
-    if (typeof customMessage === "string") {
-      try {
-        customMessage = JSON.parse(customMessage)
-        if (typeof customMessage === "string") {
-          customMessage = JSON.parse(customMessage)
-        }
-      } catch (e) {
-        console.error("Error parsing custom message:", e)
-      }
-    }
-
-    // Render custom message sections
-    if (customMessage?.sections && Array.isArray(customMessage.sections)) {
-      customMessage.sections.forEach((section: any) => {
-        if (yPos > pageHeight - 25) {
-          doc.addPage()
-          yPos = 20
-        }
-
-        if (section.type === "header") {
-          doc.setFont("helvetica", "bold")
-          doc.setFontSize(12)
-          const headerLines = doc.splitTextToSize(section.content, pageWidth - 2 * margin)
-          headerLines.forEach((line: string) => {
-            if (yPos > pageHeight - 25) {
-              doc.addPage()
-              yPos = 20
-            }
-            doc.text(line, margin, yPos)
-            yPos += 6
-          })
-          yPos += 3
-        } else if (section.type === "paragraph") {
-          doc.setFont("helvetica", "normal")
-          doc.setFontSize(10)
-          const paraLines = doc.splitTextToSize(section.content, pageWidth - 2 * margin)
-          paraLines.forEach((line: string) => {
-            if (yPos > pageHeight - 25) {
-              doc.addPage()
-              yPos = 20
-            }
-            doc.text(line, margin, yPos)
-            yPos += 5
-          })
-          yPos += 5
-        }
-      })
-    }
-  }
-
   // Partner Information Page
   doc.addPage()
   yPos = 20
@@ -685,13 +620,14 @@ Lumino requires all Partners to abide by its policies and procedures. Due to fre
 
   doc.setFont("helvetica", "bold")
   doc.text("PARTNER", margin, yPos)
-  yPos += 15 // Increased spacing before signature line
+  yPos += 10
 
   doc.setFont("helvetica", "normal")
   doc.text("Signature: _________________________________", margin, yPos)
+  yPos += 5
 
+  // Add partner signature if available
   if (application.signature_data_url) {
-    yPos -= 10 // Move up to place signature above the line
     try {
       const partnerSigImg = new Image()
       partnerSigImg.crossOrigin = "anonymous"
@@ -699,7 +635,7 @@ Lumino requires all Partners to abide by its policies and procedures. Due to fre
 
       await new Promise((resolve, reject) => {
         partnerSigImg.onload = () => {
-          doc.addImage(partnerSigImg, "PNG", margin + 20, yPos, 60, 18)
+          doc.addImage(partnerSigImg, "PNG", margin + 20, yPos - 18, 60, 18)
           resolve(true)
         }
         partnerSigImg.onerror = reject
@@ -708,7 +644,11 @@ Lumino requires all Partners to abide by its policies and procedures. Due to fre
     } catch (error) {
       console.error("Could not load partner signature image:", error)
     }
-    yPos += 10 // Move back down
+  } else if (application.partner_full_name) {
+    // If no signature image, display their typed name in italics
+    doc.setFont("helvetica", "italic")
+    doc.text(`/s/ ${application.partner_full_name}`, margin + 20, yPos - 5)
+    doc.setFont("helvetica", "normal")
   }
 
   yPos += 15
