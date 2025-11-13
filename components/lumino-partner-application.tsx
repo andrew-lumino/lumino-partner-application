@@ -539,7 +539,7 @@ export default function LuminoPartnerApplication() {
       doc.addPage()
       y = margin
 
-      const agreementSections = getAgreementText(formData, customScheduleA)
+      const agreementSections = getAgreementText(formData, customScheduleA, customCodeOfConduct, customTerms)
 
       agreementSections.forEach((section, sectionIndex) => {
         addSectionTitle(section.title)
