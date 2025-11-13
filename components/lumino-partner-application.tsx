@@ -396,7 +396,7 @@ export default function LuminoPartnerApplication() {
   }
 
   const getAgreementTextForDisplay = () => {
-    return getAgreementText(formData, customScheduleA)
+    return getAgreementText(formData, customScheduleA, customCodeOfConduct, customTerms)
   }
 
   const getBase64ImageFromUrl = async (imageUrl: string): Promise<string> => {
@@ -540,12 +540,6 @@ export default function LuminoPartnerApplication() {
       y = margin
 
       const agreementSections = getAgreementText(formData, customScheduleA)
-
-      // Ensure agreementSections is an array before calling forEach
-      if (!Array.isArray(agreementSections)) {
-        console.error("Agreement sections is not an array:", agreementSections)
-        throw new Error("Failed to generate agreement text")
-      }
 
       agreementSections.forEach((section, sectionIndex) => {
         addSectionTitle(section.title)
@@ -1498,77 +1492,6 @@ export default function LuminoPartnerApplication() {
       </CardContent>
     </Card>
   )
-
-  //  const renderReviewStep = () => (
-  //    <Card>
-  //      <CardHeader>
-  //        <CardTitle>Review Agreement & Sign</CardTitle>
-  //        <CardDescription>
-  //          Please review the partner agreement below. You must scroll to the bottom to enable the signature field.
-  //        </CardDescription>
-  //      </CardHeader>
-  //      <CardContent className="space-y-6">
-  //        <ScrollArea
-  //          className="h-96 w-full border rounded p-4"
-  //          onScrollCapture={handleAgreementScroll}
-  //          ref={agreementScrollRef}
-  //        >
-  //          <pre className="whitespace-pre-wrap font-sans text-sm">{getAgreementTextForDisplay()}</pre>
-  //        </ScrollArea>
-  //        {errors.agreement && <p className="text-red-500 text-sm">{errors.agreement}</p>}
-
-  //        <div className={cn("space-y-4 transition-opacity", !hasScrolledAgreement && "opacity-50 pointer-events-none")}>
-  //          <div className="grid md:grid-cols-2 gap-6">
-  //            <div className="space-y-2">
-  //              <Label htmlFor="signatureFullName">Typed Signature (Full Legal Name)</Label>
-  //              <Input
-  //                id="signatureFullName"
-  //                value={formData.signatureFullName}
-  //                onChange={(e) => updateFormData("signatureFullName", e.target.value)}
-  //                className={errors.signature ? "border-red-500" : ""}
-  //              />
-  //              {errors.signature && <p className="text-red-500 text-sm">{errors.signature}</p>}
-  //            </div>
-  //            <div className="space-y-2">
-  //              <Label htmlFor="signatureDate">Date</Label>
-  //              <Input
-  //                id="signatureDate"
-  //                type="date"
-  //                value={formData.signatureDate}
-  //                onChange={(e) => updateFormData("signatureDate", e.target.value)}
-  //                className={errors.signatureDate ? "border-red-500" : ""}
-  //              />
-  //              {errors.signatureDate && <p className="text-red-500 text-sm">{errors.signatureDate}</p>}
-  //            </div>
-  //          </div>
-  //          <SignaturePreview signature={formData.signatureFullName} />
-  //          <div className="flex items-start space-x-2 pt-2">
-  //            <Checkbox
-  //              id="certification"
-  //              checked={isCertified}
-  //              onCheckedChange={(checked) => setIsCertified(checked as boolean)}
-  //              disabled={!hasScrolledAgreement}
-  //            />
-  //            <div className="grid gap-1.5 leading-none">
-  //              <label
-  //                htmlFor="certification"
-  //                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-  //              >
-  //                Part II. Certification
-  //              </label>
-  //              <p className="text-sm text-muted-foreground">
-  //                Under penalties of perjury, by signing above I certify that: 1. The number shown on this form is my
-  //                correct taxpayer identification number. 2. I am not subject to backup withholding. 3. I am a U.S.
-  //                citizen or other U.S. person. 4. The FATCA code(s) entered on this form (if any) indicating that I am
-  //                exempt from FATCA reporting is correct.
-  //              </p>
-  //              {errors.certification && <p className="text-red-500 text-sm mt-1">{errors.certification}</p>}
-  //            </div>
-  //          </div>
-  //        </div>
-  //      </CardContent>
-  //    </Card>
-  //  )
 
   const renderConfirmationStep = () => (
     <Card className="text-center">

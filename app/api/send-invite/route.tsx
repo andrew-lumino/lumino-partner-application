@@ -47,7 +47,6 @@ export async function POST(req: Request) {
         custom_schedule_a: custom_schedule_a || null,
         custom_message: custom_message || null,
         custom_code_of_conduct: custom_code_of_conduct || null,
-        custom_terms: custom_terms || null,
         created_at: new Date().toISOString(),
       })
       .select("id")

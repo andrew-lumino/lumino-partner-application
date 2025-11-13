@@ -27,41 +27,6 @@ interface ScheduleAData {
   creditOptimization?: ScheduleARow
 }
 
-export interface FormData {
-  partnerFullName: string
-  partnerEmail: string
-  partnerPhone: string
-  partnerAddress: string
-  partnerCity: string
-  partnerState: string
-  partnerZip: string
-  businessName: string
-  principalName: string
-  businessAddress: string
-  businessCity: string
-  businessState: string
-  businessZip: string
-  businessPhone: string
-  federalTaxId: string
-  businessType: string
-  websiteUrl: string
-  dateOfBirth: string
-  bankAccountNumber: string
-  bankRoutingNumber: string
-  w9Name: string
-  w9BusinessName: string
-  w9TaxClassification: string
-  w9LlcClassification?: string
-  w9Address: string
-  w9CityStateZip: string
-  w9TIN: string
-  w9TINType: string
-  signatureDate: string
-  signatureFullName: string
-  codeOfConductSignature?: string
-  codeOfConductDate?: string
-}
-
 export const defaultScheduleA: ScheduleAData = {
   equipment: {
     category: "Equipment & Software",
@@ -225,7 +190,12 @@ function validateScheduleAData(data: any): ScheduleAData {
   return validated
 }
 
-export function getAgreementText(formData: any, customScheduleA?: any): string {
+export function getAgreementText(
+  formData: any,
+  customScheduleA?: any,
+  customCodeOfConduct?: any,
+  customTerms?: any,
+): Array<{ title: string; content: string }> {
   const scheduleA = validateScheduleAData(customScheduleA)
 
   const sections = [
@@ -269,11 +239,13 @@ City, State, ZIP: ${formData.w9CityStateZip || ""}`,
     },
     {
       title: "PARTNER'S CODE OF CONDUCT",
-      content: getCodeOfConductText(),
+      content: customCodeOfConduct?.sections
+        ? formatCustomSections(customCodeOfConduct.sections)
+        : getCodeOfConductText(),
     },
     {
       title: "TERMS AND CONDITIONS",
-      content: getTermsAndConditions(),
+      content: customTerms?.sections ? formatCustomSections(customTerms.sections) : getTermsAndConditions(),
     },
     {
       title: "SIGNATURES",
@@ -298,7 +270,22 @@ Date: ${formData.signatureDate || ""}`,
     },
   ]
 
-  return sections.map((section) => `${section.title}\n\n${section.content}`).join("\n\n" + "=".repeat(80) + "\n\n")
+  return sections
+}
+
+function formatCustomSections(sections: any[]): string {
+  if (!Array.isArray(sections)) return ""
+
+  return sections
+    .map((section) => {
+      if (section.type === "header") {
+        return `\n${section.content}\n`
+      } else if (section.type === "paragraph") {
+        return `${section.content}\n`
+      }
+      return ""
+    })
+    .join("\n")
 }
 
 function generateScheduleATable(scheduleA: ScheduleAData): string {
