@@ -195,8 +195,8 @@ export function getAgreementText(
   customScheduleA?: any,
   customCodeOfConduct?: any,
   customTerms?: any,
-  customMessage?: any, // Added customMessage parameter
-): Array<{ title: string; content: string }> {
+  customMessage?: any,
+): string {
   const scheduleA = validateScheduleAData(customScheduleA)
 
   const sections = [
@@ -282,6 +282,10 @@ Date: ${formData.signatureDate || ""}`,
   )
 
   return sections
+    .map((section) => {
+      return `${section.title}\n\n${section.content}\n\n`
+    })
+    .join("\n")
 }
 
 function formatCustomSections(sections: any[]): string {
