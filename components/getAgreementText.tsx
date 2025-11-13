@@ -195,6 +195,7 @@ export function getAgreementText(
   customScheduleA?: any,
   customCodeOfConduct?: any,
   customTerms?: any,
+  customMessage?: any, // Added customMessage parameter
 ): Array<{ title: string; content: string }> {
   const scheduleA = validateScheduleAData(customScheduleA)
 
@@ -203,6 +204,16 @@ export function getAgreementText(
       title: "LUMINO PARTNER AGREEMENT",
       content: `${formData.partnerFullName || ""}\n${formData.businessName || ""}\nDate: ${formData.signatureDate || new Date().toLocaleDateString()}`,
     },
+  ]
+
+  if (customMessage?.sections && Array.isArray(customMessage.sections)) {
+    sections.push({
+      title: "WELCOME MESSAGE",
+      content: formatCustomSections(customMessage.sections),
+    })
+  }
+
+  sections.push(
     {
       title: "PARTNER INFORMATION",
       content: `Full Name: ${formData.partnerFullName || ""}
@@ -268,7 +279,7 @@ Name: ${formData.partnerFullName || ""}
 
 Date: ${formData.signatureDate || ""}`,
     },
-  ]
+  )
 
   return sections
 }

@@ -168,6 +168,71 @@ export async function generateCompleteAgreementPDF(application: any) {
     doc.text(`Date: ${new Date(application.created_at).toLocaleDateString()}`, pageWidth / 2, yPos, { align: "center" })
   }
 
+  if (application.custom_message) {
+    doc.addPage()
+    yPos = 20
+
+    doc.setFontSize(16)
+    doc.setFont("helvetica", "bold")
+    doc.text("WELCOME MESSAGE", margin, yPos)
+    yPos += 15
+
+    doc.setFontSize(10)
+    doc.setFont("helvetica", "normal")
+
+    let customMessage = application.custom_message
+
+    // Parse if it's a string
+    if (typeof customMessage === "string") {
+      try {
+        customMessage = JSON.parse(customMessage)
+        if (typeof customMessage === "string") {
+          customMessage = JSON.parse(customMessage)
+        }
+      } catch (e) {
+        console.error("Error parsing custom message:", e)
+      }
+    }
+
+    // Render custom message sections
+    if (customMessage?.sections && Array.isArray(customMessage.sections)) {
+      customMessage.sections.forEach((section: any) => {
+        if (yPos > pageHeight - 25) {
+          doc.addPage()
+          yPos = 20
+        }
+
+        if (section.type === "header") {
+          doc.setFont("helvetica", "bold")
+          doc.setFontSize(12)
+          const headerLines = doc.splitTextToSize(section.content, pageWidth - 2 * margin)
+          headerLines.forEach((line: string) => {
+            if (yPos > pageHeight - 25) {
+              doc.addPage()
+              yPos = 20
+            }
+            doc.text(line, margin, yPos)
+            yPos += 6
+          })
+          yPos += 3
+        } else if (section.type === "paragraph") {
+          doc.setFont("helvetica", "normal")
+          doc.setFontSize(10)
+          const paraLines = doc.splitTextToSize(section.content, pageWidth - 2 * margin)
+          paraLines.forEach((line: string) => {
+            if (yPos > pageHeight - 25) {
+              doc.addPage()
+              yPos = 20
+            }
+            doc.text(line, margin, yPos)
+            yPos += 5
+          })
+          yPos += 5
+        }
+      })
+    }
+  }
+
   // Partner Information Page
   doc.addPage()
   yPos = 20
@@ -296,11 +361,11 @@ export async function generateCompleteAgreementPDF(application: any) {
 
   const displaySchedule = scheduleData || defaultScheduleA
 
-  doc.setFontSize(7)
+  doc.setFontSize(8)
   doc.setFont("helvetica", "normal")
 
   // Fixed column widths to prevent overlap
-  const colWidths = [50, 28, 28, 28, 28]
+  const colWidths = [60, 27, 27, 27, 27]
   const headers = ["Fee Category", "Option 1", "Option 2", "Option 3", "Option 4"]
 
   doc.setFont("helvetica", "bold")
@@ -334,35 +399,35 @@ export async function generateCompleteAgreementPDF(application: any) {
     // Category - wrap text to fit column width
     const categoryLines = doc.splitTextToSize(row.category, colWidths[0] - 2)
     doc.text(categoryLines, xPos, yPos)
-    const categoryHeight = categoryLines.length * 3
+    const categoryHeight = categoryLines.length * 3.5
 
     xPos += colWidths[0]
     // Option 1 - wrap text
     const opt1Lines = doc.splitTextToSize(row.option1 || "-", colWidths[1] - 2)
     doc.text(opt1Lines, xPos, yPos)
-    const opt1Height = opt1Lines.length * 3
+    const opt1Height = opt1Lines.length * 3.5
 
     xPos += colWidths[1]
     // Option 2 - wrap text
     const opt2Lines = doc.splitTextToSize(row.option2 || "-", colWidths[2] - 2)
     doc.text(opt2Lines, xPos, yPos)
-    const opt2Height = opt2Lines.length * 3
+    const opt2Height = opt2Lines.length * 3.5
 
     xPos += colWidths[2]
     // Option 3 - wrap text
     const opt3Lines = doc.splitTextToSize(row.option3 || "-", colWidths[3] - 2)
     doc.text(opt3Lines, xPos, yPos)
-    const opt3Height = opt3Lines.length * 3
+    const opt3Height = opt3Lines.length * 3.5
 
     xPos += colWidths[3]
     // Option 4 - wrap text
     const opt4Lines = doc.splitTextToSize(row.option4 || "-", colWidths[4] - 2)
     doc.text(opt4Lines, xPos, yPos)
-    const opt4Height = opt4Lines.length * 3
+    const opt4Height = opt4Lines.length * 3.5
 
     // Move to next row based on tallest column
     const maxHeight = Math.max(categoryHeight, opt1Height, opt2Height, opt3Height, opt4Height)
-    yPos += maxHeight + 2
+    yPos += maxHeight + 2.5
   })
 
   // Terms and Conditions
@@ -583,14 +648,14 @@ Lumino requires all Partners to abide by its policies and procedures. Due to fre
   doc.text("By signing below, both parties agree to be bound by the terms of this Agreement.", margin, yPos)
   yPos += 20
 
-// Lumino Signature
+  // Lumino Signature
   doc.setFont("helvetica", "bold")
   doc.text("LUMINO TECHNOLOGIES, LLC", margin, yPos)
-  yPos += 15  // Changed from 10 to 15 - more space before signature line
+  yPos += 15 // Changed from 10 to 15 - more space before signature line
 
   doc.setFont("helvetica", "normal")
   doc.text("Signature: _________________________________", margin, yPos)
-  yPos -= 10  // Move UP to place signature ABOVE the line
+  yPos -= 10 // Move UP to place signature ABOVE the line
 
   // Add signature image
   try {
@@ -610,7 +675,7 @@ Lumino requires all Partners to abide by its policies and procedures. Due to fre
     console.error("Could not load signature image:", error)
   }
 
-  yPos += 25  // Move past the signature line to the Name/Title
+  yPos += 25 // Move past the signature line to the Name/Title
   doc.text("Name/Title: Zachry Godfrey, CEO", margin, yPos)
   yPos += 10
   doc.text(`Date: ${new Date().toLocaleDateString()}`, margin, yPos)
@@ -620,14 +685,13 @@ Lumino requires all Partners to abide by its policies and procedures. Due to fre
 
   doc.setFont("helvetica", "bold")
   doc.text("PARTNER", margin, yPos)
-  yPos += 10
+  yPos += 15 // Increased spacing before signature line
 
   doc.setFont("helvetica", "normal")
   doc.text("Signature: _________________________________", margin, yPos)
-  yPos += 5
 
-  // Add partner signature if available
   if (application.signature_data_url) {
+    yPos -= 10 // Move up to place signature above the line
     try {
       const partnerSigImg = new Image()
       partnerSigImg.crossOrigin = "anonymous"
@@ -635,7 +699,7 @@ Lumino requires all Partners to abide by its policies and procedures. Due to fre
 
       await new Promise((resolve, reject) => {
         partnerSigImg.onload = () => {
-          doc.addImage(partnerSigImg, "PNG", margin + 20, yPos - 18, 60, 18)
+          doc.addImage(partnerSigImg, "PNG", margin + 20, yPos, 60, 18)
           resolve(true)
         }
         partnerSigImg.onerror = reject
@@ -644,11 +708,7 @@ Lumino requires all Partners to abide by its policies and procedures. Due to fre
     } catch (error) {
       console.error("Could not load partner signature image:", error)
     }
-  } else if (application.partner_full_name) {
-    // If no signature image, display their typed name in italics
-    doc.setFont("helvetica", "italic")
-    doc.text(`/s/ ${application.partner_full_name}`, margin + 20, yPos - 5)
-    doc.setFont("helvetica", "normal")
+    yPos += 10 // Move back down
   }
 
   yPos += 15
@@ -683,11 +743,11 @@ Lumino requires all Partners to abide by its policies and procedures. Due to fre
   yPos += 8
 
   doc.setFont("helvetica", "normal")
-  const executionDate = application.signature_date 
-    ? new Date(application.signature_date).toLocaleDateString('en-US', { 
-        year: 'numeric', 
-        month: 'long', 
-        day: 'numeric' 
+  const executionDate = application.signature_date
+    ? new Date(application.signature_date).toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
       })
     : "[Date]"
 

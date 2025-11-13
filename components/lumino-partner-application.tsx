@@ -396,7 +396,7 @@ export default function LuminoPartnerApplication() {
   }
 
   const getAgreementTextForDisplay = () => {
-    return getAgreementText(formData, customScheduleA, customCodeOfConduct, customTerms)
+    return getAgreementText(formData, customScheduleA, customCodeOfConduct, customTerms, customMessage)
   }
 
   const getBase64ImageFromUrl = async (imageUrl: string): Promise<string> => {
@@ -539,10 +539,20 @@ export default function LuminoPartnerApplication() {
       doc.addPage()
       y = margin
 
-      const agreementSections = getAgreementText(formData, customScheduleA)
+      // Using getAgreementTextForDisplay which now includes customMessage
+      const agreementSections = getAgreementTextForDisplay()
+        .split("\n\n")
+        .map((section) => ({ title: "", content: section }))
 
       agreementSections.forEach((section, sectionIndex) => {
-        addSectionTitle(section.title)
+        // Simplified title handling for this section as getAgreementTextForDisplay now returns a single string
+        doc.setFontSize(16)
+        doc.setFont("helvetica", "bold")
+        y += 10
+        checkNewPage(16)
+        doc.text(`Agreement Section ${sectionIndex + 1}`, margin, y) // Add a generic title for each section
+        y += 8
+
         doc.setFontSize(9)
         doc.setFont("helvetica", "normal")
 
