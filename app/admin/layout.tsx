@@ -19,6 +19,8 @@ export default async function AdminLayout({
     "giorgio@golumino.com",
     "clay@golumino.com",
     "priscilla@golumino.com",
+    "dev@golumino.com",
+    "garrett@golumino.com",
     "stephanie@golumino.com", // Added stephanie to authorized users
   ]
 
