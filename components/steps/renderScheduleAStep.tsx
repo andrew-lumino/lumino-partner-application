@@ -160,7 +160,6 @@ export const renderScheduleAStep = (customScheduleA?: any, customTerms?: any) =>
       </CardContent>
 
       <CardContent className="prose dark:prose-invert max-w-none">
-        <h3 className="text-2xl mt-10 mb-4">TERMS</h3>
         {customTerms?.sections && Array.isArray(customTerms.sections) ? (
           <div className="space-y-4">
             {customTerms.sections.map((section: any, index: number) => {
@@ -182,6 +181,7 @@ export const renderScheduleAStep = (customScheduleA?: any, customTerms?: any) =>
           </div>
         ) : (
           <>
+            <h3 className="text-2xl mt-10 mb-4">TERMS</h3>
             <p>
               <strong>PASS-THROUGH FEES</strong> – fees are back-end charges, including but not limited to the cost of
               postage, paper statements, merchant records, terminal records, TMF look-ups, arbitration, and RMS fees. If

@@ -28,24 +28,12 @@ const defaultTerms: CustomTermsData = {
     {
       id: "1",
       type: "header",
-      content: "PASS-THROUGH FEES",
+      content: "",
     },
     {
       id: "2",
       type: "paragraph",
-      content:
-        "fees are back-end charges, including but not limited to the cost of postage, paper statements, merchant records, terminal records, TMF look-ups, arbitration, and RMS fees. If any pass-through fees are applicable, they will be priced at cost and passed through to the Sales Partner.",
-    },
-    {
-      id: "3",
-      type: "header",
-      content: "SPECIAL TERMS",
-    },
-    {
-      id: "4",
-      type: "paragraph",
-      content:
-        "This Revenue Sharing Program is part of the Lumino Partner Agreement (\"Partner Agreement\"). Additional terms and conditions may apply. All approved applications will be paid in accordance with the Option chosen at the time the application is submitted. If there is any change to the service offering that would cause a change to the Option originally chosen, Partner shall be paid at the appropriate Option from the date of the change in service (ex. Sales signed on Option 2 and later want a free POS Option 1). The Partner will be paid according to the new Option from the date the new Option is selected. This result may increase or decrease the residual split.\n\nOnly new merchants that are not already on Lumino's platform qualify for the pricing in this Schedule A. Lumino shall retract any commissions paid to Partner for equipment placed at a Merchant location if the Merchant for which commissions were earned cancels, materially reduces processing volume, or the Monthly Minimum is reduced or removed within twelve months from the date of Adjustment as explained above. Partner agrees to use reasonable efforts in assisting Lumino's retrieval of the POS Equipment and Add-Ons in the event of merchant cancellation or termination.",
+      content: "",
     },
   ],
 }
