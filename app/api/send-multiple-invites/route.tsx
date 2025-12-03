@@ -10,7 +10,7 @@ export async function POST(req: Request) {
     const supabase = await createClient()
 
     // Use the correct base URL for the application
-    const baseUrl = "https://partner.golumino.com"
+    const baseUrl = "https://partner.lumino.io"
 
     // Create individual invite records for each email
     const invitePromises = emails.map(async (email: string) => {
@@ -75,7 +75,7 @@ export async function POST(req: Request) {
             <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #eee; text-align: center; color: #666; font-size: 12px;">
               <p>Lumino Technologies<br>
               4201 Main St Suite 201, Houston, TX 77002<br>
-              1-866-488-4168 | www.golumino.com</p>
+              1-866-488-4168 | www.lumino.io</p>
             </div>
           </div>
         `,

@@ -1,5 +1,4 @@
 import type React from "react"
-import type { Metadata } from "next"
 import { Inter } from "next/font/google"
 import { ClerkProvider } from "@clerk/nextjs"
 import { currentUser } from "@clerk/nextjs/server"
@@ -17,7 +16,7 @@ export const metadata = {
   openGraph: {
     title: "Lumino Partner Application",
     description: "Apply to become a Lumino Partner and join our ecosystem.",
-    url: "https://partner.golumino.com",
+    url: "https://partner.lumino.io",
     siteName: "Lumino",
     type: "website",
   },
@@ -53,6 +52,7 @@ export default async function RootLayout({
           {isAuthorized && <AdminHeader />}
           <main>{children}</main>
           <Toaster />
+          <Analytics />
         </body>
       </html>
     </ClerkProvider>

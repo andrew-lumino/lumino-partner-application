@@ -85,7 +85,7 @@ export default function InviteManager() {
 
       const sendData = await sendRes.json()
       if (sendData.success) {
-        const link = `https://partner.golumino.com?id=${sendData.inviteId}`
+        const link = `https://partner.lumino.io?id=${sendData.inviteId}`
         setInviteLink(link)
         setInviteId(sendData.inviteId)
 

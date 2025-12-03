@@ -65,7 +65,7 @@ export async function POST(req: Request) {
       )
     }
 
-    const baseUrl = "https://partner.golumino.com"
+    const baseUrl = "https://partner.lumino.io"
     const inviteLink = `${baseUrl}?id=${inviteData.id}`
 
     // Send the email
@@ -110,7 +110,7 @@ export async function POST(req: Request) {
           <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #eee; text-align: center; color: #666; font-size: 12px;">
             <p>Lumino Technologies<br>
             4201 Main St Suite 201, Houston, TX 77002<br>
-            1-866-488-4168 | www.golumino.com</p>
+            1-866-488-4168 | www.lumino.io</p>
           </div>
         </div>
       `,

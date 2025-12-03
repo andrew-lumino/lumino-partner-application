@@ -23,7 +23,7 @@ export const renderWelcomeStep = (customMessage?: CustomMessageData) => {
               className="h-12 mx-auto mb-2"
             />
             <p className="text-sm text-muted-foreground">
-              4201 Main St Suite 201, Houston, TX 77002 | 1-866-488-4168 | support@golumino.com | www.golumino.com
+              4201 Main St Suite 201, Houston, TX 77002 | 1-866-488-4168 | support@golumino.com | www.lumino.io
             </p>
           </div>
         </CardHeader>
@@ -53,7 +53,7 @@ export const renderWelcomeStep = (customMessage?: CustomMessageData) => {
             className="h-12 mx-auto mb-2"
           />
           <p className="text-sm text-muted-foreground">
-            4201 Main St Suite 201, Houston, TX 77002 | 1-866-488-4168 | support@golumino.com | www.golumino.com
+            4201 Main St Suite 201, Houston, TX 77002 | 1-866-488-4168 | support@golumino.com | www.lumino.io
           </p>
         </div>
         <CardTitle className="text-3xl font-bold text-gray-800">Welcome to Lumino - Payments with Purpose</CardTitle>

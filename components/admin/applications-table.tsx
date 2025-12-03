@@ -1,5 +1,7 @@
 "use client"
 
+import type React from "react"
+
 import { useState, useEffect, useCallback, useRef } from "react" // Added useRef here
 import { useToast } from "@/hooks/use-toast"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
@@ -14,11 +16,7 @@ import {
   ExternalLink,
   Trash2,
   RotateCcw,
-  Mail,
-  FolderDown,
-  FileDown,
   Info,
-  CloudLightning,
   Star,
   ClipboardCopy,
 } from "lucide-react"
@@ -77,8 +75,16 @@ const SEARCH_PREFIXES = [
   { prefix: "conduct_date:", description: "Code of Conduct Date" },
   { prefix: "custom:", description: "Custom Schedule A (true/false or search content)" },
   { prefix: "schedule_a:", description: "Custom Schedule A (alias)" },
-  { prefix: "has:", description: "Has field (custom_schedule, drivers_license, voided_check, w9, signature, bank_info, dob, principal, website)" },
-  { prefix: "missing:", description: "Missing field (name, email, phone, business, principal, address, tax_id, website, agent, signature, drivers_license, voided_check, bank_info, w9, custom_schedule)" }
+  {
+    prefix: "has:",
+    description:
+      "Has field (custom_schedule, drivers_license, voided_check, w9, signature, bank_info, dob, principal, website)",
+  },
+  {
+    prefix: "missing:",
+    description:
+      "Missing field (name, email, phone, business, principal, address, tax_id, website, agent, signature, drivers_license, voided_check, bank_info, w9, custom_schedule)",
+  },
 ]
 
 // Helper function for date queries - move outside component
@@ -86,66 +92,65 @@ const SEARCH_PREFIXES = [
 function evaluateDateQuery(dateValue: any, query: string): boolean {
   // Add safety checks to prevent crashes
   if (!dateValue || !query) return false
-  
+
   try {
     const date = new Date(dateValue)
-    
+
     // Check if date is valid
     if (isNaN(date.getTime())) return false
-    
+
     const today = new Date()
     const queryLower = query.toLowerCase().trim()
-    
+
     // Handle relative dates
     if (queryLower === "today") {
       return date.toISOString().split("T")[0] === today.toISOString().split("T")[0]
     }
-    
+
     if (queryLower === "yesterday") {
       const yesterday = new Date(today)
       yesterday.setDate(yesterday.getDate() - 1)
       return date.toISOString().split("T")[0] === yesterday.toISOString().split("T")[0]
     }
-    
+
     if (queryLower.includes("last") && queryLower.includes("days")) {
-      const days = parseInt(queryLower.match(/\d+/)?.[0] || "0")
+      const days = Number.parseInt(queryLower.match(/\d+/)?.[0] || "0")
       if (isNaN(days)) return false
-      
+
       const cutoff = new Date(today)
       cutoff.setDate(cutoff.getDate() - days)
       return date >= cutoff
     }
-    
+
     // Handle comparison operators
     if (query.startsWith(">")) {
       const compareDate = new Date(query.substring(1))
       if (isNaN(compareDate.getTime())) return false
       return date > compareDate
     }
-    
+
     if (query.startsWith("<")) {
       const compareDate = new Date(query.substring(1))
       if (isNaN(compareDate.getTime())) return false
       return date < compareDate
     }
-    
+
     if (query.startsWith(">=")) {
       const compareDate = new Date(query.substring(2))
       if (isNaN(compareDate.getTime())) return false
       return date >= compareDate
     }
-    
+
     if (query.startsWith("<=")) {
       const compareDate = new Date(query.substring(2))
       if (isNaN(compareDate.getTime())) return false
       return date <= compareDate
     }
-    
+
     // Exact date match
     const queryDate = new Date(query)
     if (isNaN(queryDate.getTime())) return false
     return date.toISOString().split("T")[0] === queryDate.toISOString().split("T")[0]
-    
   } catch (error) {
     // If any error occurs, just return false instead of crashing
     return false
@@ -286,118 +291,117 @@ export default function ApplicationsTable({ applications: initialApplications }:
           case "partner_name":
             result = safeStringConversion(app.partner_full_name).toLowerCase().includes(value)
             break
-          
+
           case "email":
           case "partner_email":
             result = safeStringConversion(app.partner_email).toLowerCase().includes(value)
             break
-          
+
           case "phone":
           case "partner_phone":
             result = safeStringConversion(app.partner_phone).toLowerCase().includes(value)
             break
-          
+
           case "business":
           case "business_name":
             result = safeStringConversion(app.business_name).toLowerCase().includes(value)
             break
-          
+
           case "business_type":
             result = safeStringConversion(app.business_type).toLowerCase().includes(value)
             break
-          
+
           case "principal":
           case "principal_name":
             result = safeStringConversion(app.principal_name).toLowerCase().includes(value)
             break
-          
+
           case "address":
             const addressFields = [
               safeStringConversion(app.partner_address),
               safeStringConversion(app.business_address),
               safeStringConversion(app.w9_address),
               `${safeStringConversion(app.partner_city)} ${safeStringConversion(app.partner_state)}`,
-              `${safeStringConversion(app.business_city)} ${safeStringConversion(app.business_state)}`
+              `${safeStringConversion(app.business_city)} ${safeStringConversion(app.business_state)}`,
             ]
-            result = addressFields.some(field => field.toLowerCase().includes(value))
+            result = addressFields.some((field) => field.toLowerCase().includes(value))
             break
-          
+
           case "city":
-            result = [
-              safeStringConversion(app.partner_city),
-              safeStringConversion(app.business_city)
-            ].some(city => city.toLowerCase().includes(value))
+            result = [safeStringConversion(app.partner_city), safeStringConversion(app.business_city)].some((city) =>
+              city.toLowerCase().includes(value),
+            )
             break
-          
+
           case "state":
-            result = [
-              safeStringConversion(app.partner_state),
-              safeStringConversion(app.business_state)
-            ].some(state => state.toLowerCase().includes(value))
+            result = [safeStringConversion(app.partner_state), safeStringConversion(app.business_state)].some((state) =>
+              state.toLowerCase().includes(value),
+            )
             break
-          
+
           case "zip":
-            result = [
-              safeStringConversion(app.partner_zip),
-              safeStringConversion(app.business_zip)
-            ].some(zip => zip.toLowerCase().includes(value))
+            result = [safeStringConversion(app.partner_zip), safeStringConversion(app.business_zip)].some((zip) =>
+              zip.toLowerCase().includes(value),
+            )
             break
-          
+
           case "status":
             result = safeStringConversion(app.status).toLowerCase().includes(value)
             break
-          
+
           case "agent":
-            result = safeStringConversion(app.agent || "direct").toLowerCase().includes(value)
+            result = safeStringConversion(app.agent || "direct")
+              .toLowerCase()
+              .includes(value)
             break
-          
+
           case "id":
             result = safeStringConversion(app.id).toLowerCase() === value
             break
-          
+
           case "federal_tax_id":
           case "tax_id":
             result = safeStringConversion(app.federal_tax_id).toLowerCase().includes(value)
             break
-          
+
           case "website":
           case "website_url":
             result = safeStringConversion(app.website_url).toLowerCase().includes(value)
             break
-          
+
           case "w9_name":
             result = safeStringConversion(app.w9_name).toLowerCase().includes(value)
             break
-          
+
           case "w9_business":
           case "w9_business_name":
             result = safeStringConversion(app.w9_business_name).toLowerCase().includes(value)
             break
-          
+
           case "w9_classification":
           case "tax_classification":
             result = safeStringConversion(app.w9_tax_classification).toLowerCase().includes(value)
             break
-          
+
           case "w9_tin":
           case "tin":
             result = safeStringConversion(app.w9_tin).toLowerCase().includes(value)
             break
-          
+
           case "signature_name":
             result = safeStringConversion(app.signature_full_name).toLowerCase().includes(value)
             break
-          
+
           case "bank_account":
           case "account_number":
             result = safeStringConversion(app.bank_account_number).includes(value)
             break
-          
+
           case "routing":
           case "routing_number":
             result = safeStringConversion(app.bank_routing_number).toLowerCase().includes(value)
             break
-          
+
           case "dob":
           case "date_of_birth":
             try {
@@ -406,7 +410,7 @@ export default function ApplicationsTable({ applications: initialApplications }:
               result = false
             }
             break
-          
+
           case "created":
           case "submitted":
             try {
@@ -415,7 +419,7 @@ export default function ApplicationsTable({ applications: initialApplications }:
               result = false
             }
             break
-          
+
           case "signature_date":
             try {
               result = evaluateDateQuery(app.signature_date, value)
@@ -423,7 +427,7 @@ export default function ApplicationsTable({ applications: initialApplications }:
               result = false
             }
             break
-          
+
           case "conduct_date":
             try {
               result = evaluateDateQuery(app.code_of_conduct_date, value)
@@ -431,13 +435,13 @@ export default function ApplicationsTable({ applications: initialApplications }:
               result = false
             }
             break
-          
+
           case "has":
             if (!value) {
               result = true
               break
             }
-            
+
             switch (value) {
               case "custom_schedule":
                 result = !!app.custom_schedule_a
@@ -470,7 +474,7 @@ export default function ApplicationsTable({ applications: initialApplications }:
                 result = false
             }
             break
-          
+
           case "missing":
             if (!value) {
               result = true
@@ -479,7 +483,7 @@ export default function ApplicationsTable({ applications: initialApplications }:
 
             const fieldMappings: Record<string, string> = {
               name: "partner_full_name",
-              email: "partner_email", 
+              email: "partner_email",
               phone: "partner_phone",
               business: "business_name",
               principal: "principal_name",
@@ -497,11 +501,11 @@ export default function ApplicationsTable({ applications: initialApplications }:
               routing: "bank_routing_number",
               dob: "date_of_birth",
               w9_name: "w9_name",
-              w9_tin: "w9_tin"
+              w9_tin: "w9_tin",
             }
-            
+
             const field = fieldMappings[value] || value
-            
+
             if (value === "custom_schedule") {
               result = !app.custom_schedule_a
             } else if (value === "agent") {
@@ -515,7 +519,7 @@ export default function ApplicationsTable({ applications: initialApplications }:
               result = !fieldValue
             }
             break
-          
+
           case "custom":
           case "schedule_a":
             if (!value) {
@@ -537,7 +541,7 @@ export default function ApplicationsTable({ applications: initialApplications }:
               }
             }
             break
-          
+
           default:
             result = false
         }
@@ -557,12 +561,10 @@ export default function ApplicationsTable({ applications: initialApplications }:
           safeStringConversion(app.partner_city),
           safeStringConversion(app.partner_state),
           safeStringConversion(app.business_city),
-          safeStringConversion(app.business_state)
+          safeStringConversion(app.business_state),
         ]
-        
-        result = searchFields.some((field) => 
-          field.toLowerCase().includes(generalValue)
-        )
+
+        result = searchFields.some((field) => field.toLowerCase().includes(generalValue))
       }
 
       return isNegated ? !result : result
@@ -708,8 +710,9 @@ export default function ApplicationsTable({ applications: initialApplications }:
   const handleCopyLink = (app: Application) => {
     if (!app.id) return
 
-    const link = `https://partner.golumino.com/?id=${app.id}`
-    navigator.clipboard.writeText(link)
+    const link = `https://partner.lumino.io/?id=${app.id}`
+    navigator.clipboard
+      .writeText(link)
       .then(() => {
         toast({
           title: "Copied!",
@@ -792,32 +795,75 @@ export default function ApplicationsTable({ applications: initialApplications }:
                   />
                 </TooltipTrigger>
                 <TooltipContent side="bottom" className="max-w-lg text-sm leading-relaxed">
-                  <p><b>Pro Tip 💡:</b> Use smart search to filter partner applications by any field.</p>
+                  <p>
+                    <b>Pro Tip 💡:</b> Use smart search to filter partner applications by any field.
+                  </p>
                   <ul className="mt-2 space-y-1">
-                    <li><code className="bg-slate-700 text-white px-1">john</code> → matches anything with "john"</li>
-                    <li><code className="bg-slate-700 text-white px-1">!john</code> → excludes anything with "john"</li>
-                    <li><code className="bg-slate-700 text-white px-1">agent:smith</code> → filter by agent/account manager</li>
-                    <li><code className="bg-slate-700 text-white px-1">email:test</code> → searches in partner email field</li>
-                    <li><code className="bg-slate-700 text-white px-1">status:submitted</code> → filter by application status</li>
-                    <li><code className="bg-slate-700 text-white px-1">business_type:llc</code> → filter by business type</li>
-                    <li><code className="bg-slate-700 text-white px-1">state:ca</code> → filter by any state (partner or business)</li>
-                    <li><code className="bg-slate-700 text-white px-1">missing:email</code> → finds apps missing email</li>
-                    <li><code className="bg-slate-700 text-white px-1">has:custom_schedule</code> → has custom schedule A</li>
-                    <li><code className="bg-slate-700 text-white px-1">has:drivers_license</code> → has uploaded driver's license</li>
-                    <li><code className="bg-slate-700 text-white px-1">has:w9</code> → has W9 information</li>
-                    <li><code className="bg-slate-700 text-white px-1">missing:signature</code> → missing code of conduct signature</li>
-                    <li><code className="bg-slate-700 text-white px-1">custom:true</code> → has custom schedule A</li>
-                    <li><code className="bg-slate-700 text-white px-1">created:today</code> → submitted today</li>
-                    <li><code className="bg-slate-700 text-white px-1">created:{'>'}2024-01-01</code> → submitted after date</li>
-                    <li><code className="bg-slate-700 text-white px-1">dob:{'>'}1990-01-01</code> → date of birth after date</li>
-                    <li><code className="bg-slate-700 text-white px-1">missing:bank_info & !test</code> → combine with "&"</li>
+                    <li>
+                      <code className="bg-slate-700 text-white px-1">john</code> → matches anything with "john"
+                    </li>
+                    <li>
+                      <code className="bg-slate-700 text-white px-1">!john</code> → excludes anything with "john"
+                    </li>
+                    <li>
+                      <code className="bg-slate-700 text-white px-1">agent:smith</code> → filter by agent/account
+                      manager
+                    </li>
+                    <li>
+                      <code className="bg-slate-700 text-white px-1">email:test</code> → searches in partner email field
+                    </li>
+                    <li>
+                      <code className="bg-slate-700 text-white px-1">status:submitted</code> → filter by application
+                      status
+                    </li>
+                    <li>
+                      <code className="bg-slate-700 text-white px-1">business_type:llc</code> → filter by business type
+                    </li>
+                    <li>
+                      <code className="bg-slate-700 text-white px-1">state:ca</code> → filter by any state (partner or
+                      business)
+                    </li>
+                    <li>
+                      <code className="bg-slate-700 text-white px-1">missing:email</code> → finds apps missing email
+                    </li>
+                    <li>
+                      <code className="bg-slate-700 text-white px-1">has:custom_schedule</code> → has custom schedule A
+                    </li>
+                    <li>
+                      <code className="bg-slate-700 text-white px-1">has:drivers_license</code> → has uploaded driver's
+                      license
+                    </li>
+                    <li>
+                      <code className="bg-slate-700 text-white px-1">has:w9</code> → has W9 information
+                    </li>
+                    <li>
+                      <code className="bg-slate-700 text-white px-1">missing:signature</code> → missing code of conduct
+                      signature
+                    </li>
+                    <li>
+                      <code className="bg-slate-700 text-white px-1">custom:true</code> → has custom schedule A
+                    </li>
+                    <li>
+                      <code className="bg-slate-700 text-white px-1">created:today</code> → submitted today
+                    </li>
+                    <li>
+                      <code className="bg-slate-700 text-white px-1">created:{">"}2024-01-01</code> → submitted after
+                      date
+                    </li>
+                    <li>
+                      <code className="bg-slate-700 text-white px-1">dob:{">"}1990-01-01</code> → date of birth after
+                      date
+                    </li>
+                    <li>
+                      <code className="bg-slate-700 text-white px-1">missing:bank_info & !test</code> → combine with "&"
+                    </li>
                   </ul>
                   <p className="mt-3 text-xs text-gray-500">
                     Type <b>/</b> for quick shortcuts like <b>/name</b>, <b>/email</b>, <b>/status</b>, etc.
                   </p>
                 </TooltipContent>
               </Tooltip>
-              
+
               {showSuggestions && suggestions.length > 0 && (
                 <div className="absolute z-10 w-full mt-1 bg-white border rounded-md shadow-lg max-h-60 overflow-y-auto">
                   <ul className="py-1">
@@ -976,12 +1022,17 @@ export default function ApplicationsTable({ applications: initialApplications }:
 
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm text-gray-600">
                               <div>
-                                <span className="block">Submitted on: {formatDateTime(selectedApplication.created_at)}</span>
-                                <span className="block">Team Member: {selectedApplication.agent ? selectedApplication.agent.toUpperCase() : "DIRECT"}</span>
+                                <span className="block">
+                                  Submitted on: {formatDateTime(selectedApplication.created_at)}
+                                </span>
+                                <span className="block">
+                                  Team Member:{" "}
+                                  {selectedApplication.agent ? selectedApplication.agent.toUpperCase() : "DIRECT"}
+                                </span>
                               </div>
                             </div>
                           </div>
-                          
+
                           <Tabs defaultValue="details" className="w-full flex-1 flex flex-col min-h-0">
                             <TabsList className="grid w-full grid-cols-3 flex-shrink-0">
                               <TabsTrigger value="details">Application Details</TabsTrigger>
