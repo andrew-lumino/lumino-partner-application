@@ -37,7 +37,7 @@ export async function POST(req: Request) {
     const sanitizedEmail = sanitizeString(email)
     const sanitizedAgent = agent ? sanitizeString(agent) : null
 
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: inviteData, error: dbError } = await supabase
       .from("partner_applications")
       .insert({

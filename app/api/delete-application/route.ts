@@ -4,7 +4,7 @@ import { createClient } from "@/lib/supabase/server"
 
 export async function DELETE(req: Request) {
   const { id } = await req.json()
-  const supabase = createClient()
+  const supabase = await createClient()
 
   try {
     // First, get the application data before deleting
@@ -24,10 +24,7 @@ export async function DELETE(req: Request) {
     }
 
     // Delete from Supabase first
-    const { error: deleteError } = await supabase
-      .from("partner_applications")
-      .delete()
-      .eq("id", id)
+    const { error: deleteError } = await supabase.from("partner_applications").delete().eq("id", id)
 
     if (deleteError) {
       console.error("Failed to delete from Supabase:", deleteError)
@@ -55,9 +52,12 @@ export async function DELETE(req: Request) {
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error("Unexpected error:", error)
-    return NextResponse.json({ 
-      success: false, 
-      error: error instanceof Error ? error.message : "Unexpected error occurred" 
-    }, { status: 500 })
+    return NextResponse.json(
+      {
+        success: false,
+        error: error instanceof Error ? error.message : "Unexpected error occurred",
+      },
+      { status: 500 },
+    )
   }
 }

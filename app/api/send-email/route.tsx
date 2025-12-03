@@ -223,7 +223,7 @@ export async function POST(req: Request) {
     const validatedScheduleA = validateScheduleA(customScheduleA)
     console.log("Validated Schedule A keys:", Object.keys(validatedScheduleA))
 
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const snakeFormData = camelToSnake(formData)
 

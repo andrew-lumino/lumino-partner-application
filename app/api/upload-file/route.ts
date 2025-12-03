@@ -16,10 +16,7 @@ export async function POST(req: Request) {
     }
 
     if (!fileContent || !filename || !contentType) {
-      return NextResponse.json(
-        { success: false, error: "Missing required fields" },
-        { status: 400 },
-      )
+      return NextResponse.json({ success: false, error: "Missing required fields" }, { status: 400 })
     }
 
     // Convert base64 → buffer
@@ -29,13 +26,10 @@ export async function POST(req: Request) {
     // Enforce 10MB size limit
     const MAX_SIZE = 10 * 1024 * 1024
     if (fileBuffer.length > MAX_SIZE) {
-      return NextResponse.json(
-        { success: false, error: "File size exceeds 10MB limit" },
-        { status: 400 },
-      )
+      return NextResponse.json({ success: false, error: "File size exceeds 10MB limit" }, { status: 400 })
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
 
     // 🔒 Sanitize and normalize filename
     const emailSafe = (email ?? "unknown").replace(/[^a-zA-Z0-9_-]/g, "_")
@@ -50,25 +44,18 @@ export async function POST(req: Request) {
     const objectKey = `${emailSafe}/${timestamp}_${cleanName}`
 
     // Upload to Supabase
-    const { error: uploadError } = await supabase.storage
-      .from("partner-uploads")
-      .upload(objectKey, fileBuffer, {
-        contentType,
-        upsert: false,
-      })
+    const { error: uploadError } = await supabase.storage.from("partner-uploads").upload(objectKey, fileBuffer, {
+      contentType,
+      upsert: false,
+    })
 
     if (uploadError) {
       console.error("Supabase upload error:", uploadError)
-      return NextResponse.json(
-        { success: false, error: uploadError.message },
-        { status: 500 },
-      )
+      return NextResponse.json({ success: false, error: uploadError.message }, { status: 500 })
     }
 
     // Get public URL
-    const { data } = supabase.storage
-      .from("partner-uploads")
-      .getPublicUrl(objectKey)
+    const { data } = supabase.storage.from("partner-uploads").getPublicUrl(objectKey)
 
     return NextResponse.json({
       success: true,

@@ -7,7 +7,7 @@ export async function GET(request: Request) {
   const limit = Number.parseInt(searchParams.get("limit") || "20")
   const offset = (page - 1) * limit
 
-  const supabase = createClient()
+  const supabase = await createClient()
 
   const { data, error } = await supabase
     .from("partner_applications")

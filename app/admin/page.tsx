@@ -2,7 +2,7 @@ import { createClient } from "@/lib/supabase/server"
 import ApplicationsTable from "@/components/admin/applications-table"
 
 export default async function AdminPage() {
-  const supabase = createClient()
+  const supabase = await createClient()
   const { data: applications, error } = await supabase
     .from("partner_applications")
     .select("*")

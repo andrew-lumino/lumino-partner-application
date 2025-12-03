@@ -7,7 +7,7 @@ const resend = new Resend(process.env.RESEND_API_KEY)
 export async function POST(req: Request) {
   try {
     const { emails, agent, custom_schedule_a, custom_message, custom_code_of_conduct, custom_terms } = await req.json()
-    const supabase = createClient()
+    const supabase = await createClient()
 
     // Use the correct base URL for the application
     const baseUrl = "https://partner.golumino.com"
