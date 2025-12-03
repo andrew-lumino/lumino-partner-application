@@ -1,8 +1,9 @@
 import LuminoPartnerApplication from "@/components/lumino-partner-application"
 import Link from "next/link"
 
-export default function Home({ searchParams }: { searchParams: { [key: string]: string } }) {
-  const inviteId = searchParams.id
+export default async function Home({ searchParams }: { searchParams: Promise<{ [key: string]: string }> }) {
+  const params = await searchParams
+  const inviteId = params.id
 
   if (inviteId) {
     return (
@@ -22,7 +23,8 @@ export default function Home({ searchParams }: { searchParams: { [key: string]: 
       <div className="max-w-lg bg-white p-8 rounded-lg shadow">
         <h1 className="text-2xl font-bold text-gray-900 mb-4">Welcome, Lumino Partners!</h1>
         <p className="text-gray-700 mb-6">
-          To access the Lumino Partner Application, you must obtain a validated link with an application ID. Please use the invitation link you received or request one from our team here if you do not have one yet.
+          To access the Lumino Partner Application, you must obtain a validated link with an application ID. Please use
+          the invitation link you received or request one from our team here if you do not have one yet.
         </p>
         <div className="flex flex-col gap-3">
           <Link
